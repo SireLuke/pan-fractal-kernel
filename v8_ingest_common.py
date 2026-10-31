@@ -1,15 +1,15 @@
 """Shared data-to-V8 execution bridge for PAN V8 / JOBF.
 
-Raw scientific values remain in their source files. This module only maps
-calibrated [0,1] proxies into V8 and records JOBF response diagnostics.
+Raw scientific values remain in their source files. Calibrated [0,1] proxies
+enter the canonical Janus Hydra Semantic Reader before JOBF evaluation.
 """
 from __future__ import annotations
 import numpy as np
-from janus_hydra import V8State
-from jobf_v0_2 import JanusOctadialBreathingField, sphere_directions, aggregate_heads
-from janus_hydra import formation_heads, inverse_heads
+from hydra_semantic_reader import read_semantics
+from jobf_v0_2 import JanusOctadialBreathingField, sphere_directions
 
 V8_KEYS = ("h", "R", "u", "d", "tau", "chi", "s", "f")
+
 
 def robust01(values):
     x = np.asarray(values, dtype=float)
@@ -21,21 +21,19 @@ def robust01(values):
     y[~finite] = .5
     return y
 
+
 def run_v8_jobf(vector, *, steps=24, dt=.01, samples=256, seed=17, shape_bias=0.0):
-    """Inject one normalized V8 state into JOBF and return its diagnostics."""
-    vector = np.asarray(vector, dtype=float)
-    if vector.shape != (8,) or not np.all(np.isfinite(vector)):
-        raise ValueError("V8 vector must contain 8 finite values")
-    vector = np.clip(vector, 0.0, 1.0)
-    state = V8State(**dict(zip(V8_KEYS, map(float, vector))))
-    state.validate()
+    """Inject one normalized V8 state through the semantic reader into JOBF."""
+    frame = read_semantics(vector)
+    state = frame.state
+    vector = np.asarray([getattr(state, key) for key in V8_KEYS], dtype=float)
 
     model = JanusOctadialBreathingField(dt=dt, shape_bias=shape_bias)
     model.base = vector.copy()
     model.state_amp = np.zeros(8, dtype=float)
-    baseline = model._state_at(0.0)
-    model.h_base = aggregate_heads(formation_heads(baseline))
-    model.d_base = aggregate_heads(inverse_heads(baseline), inverse=True)
+    baseline = read_semantics(state)
+    model.h_base = baseline.uhfe_channels.copy()
+    model.d_base = baseline.udfe_channels.copy()
 
     directions = sphere_directions(samples, seed=seed)
     times = np.arange(steps, dtype=float) * dt

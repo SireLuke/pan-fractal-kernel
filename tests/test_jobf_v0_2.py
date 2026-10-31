@@ -2,9 +2,10 @@ import numpy as np
 import pytest
 
 from janus_hydra import (
-    V8State, complement, formation_heads, inverse_heads,
+    V8State, complement, formation_heads, inverse_heads, paired_heads,
     cross_polytope_radius, octadial_weights, golden_angle_phases,
 )
+from hydra_semantic_reader import read_semantics, coerce_v8_state, project_heads, INVERSE_NAMES
 from jobf_v0_2 import JanusOctadialBreathingField, sphere_directions, base_radius, aggregate_heads
 
 
@@ -29,6 +30,46 @@ def test_head_projections_are_finite_and_bounded():
     for scores in (formation_heads(state), inverse_heads(state)):
         assert len(scores) == 5
         assert all(np.isfinite(x) and 0 <= x <= 1 for x in scores.values())
+
+
+def test_janus_head_pairs_preserve_distinct_semantic_names():
+    state = sample_state()
+    forward, inverse, pairs = formation_heads(state), inverse_heads(state), paired_heads(state)
+    assert set(forward) == set(pairs)
+    assert len(inverse) == len(pairs) == 5
+    for formation_name, inverse_name in INVERSE_NAMES.items():
+        assert pairs[formation_name]["formation"] == pytest.approx(forward[formation_name])
+        assert pairs[formation_name]["inverse"] == pytest.approx(inverse[inverse_name])
+        assert inverse_name != formation_name
+
+
+def test_semantic_reader_is_the_canonical_v8_gateway():
+    state = sample_state()
+    frame = read_semantics(state)
+    mapping = {key: getattr(state, key) for key in ("h", "R", "u", "d", "tau", "chi", "s", "f")}
+    assert read_semantics(mapping).state == state
+    assert read_semantics(tuple(mapping.values())).state == state
+    assert frame.coordinate_order == ("h", "R", "u", "d", "tau", "chi", "s", "f")
+    assert frame.reader == "janus_hydra_semantic_reader"
+    assert frame.uhfe_channels.shape == frame.udfe_channels.shape == (8,)
+    assert np.all(np.isfinite(frame.uhfe_channels))
+    assert np.all(np.isfinite(frame.udfe_channels))
+
+
+def test_semantic_reader_accepts_provisional_t_alias_only_when_tau_absent():
+    mapping = {key: getattr(sample_state(), key) for key in ("h", "R", "u", "d", "tau", "chi", "s", "f")}
+    mapping["T"] = mapping.pop("tau")
+    assert read_semantics(mapping).state.tau == pytest.approx(.65)
+    mapping["tau"] = .65
+    with pytest.raises(ValueError):
+        read_semantics(mapping)
+
+
+def test_semantic_reader_rejects_incomplete_or_out_of_range_inputs():
+    with pytest.raises(ValueError):
+        read_semantics({"h": .5})
+    with pytest.raises(ValueError):
+        coerce_v8_state((.5, .5, .5, .5, .5, .5, .5, 1.2))
 
 
 def test_cross_polytope_axis_and_diagonal_radii():
@@ -67,7 +108,9 @@ def test_jobf_boundary_is_finite_positive_and_origin_domain_is_not_split():
         assert np.all(np.isfinite(rho))
         assert np.all(rho > 0)
         assert np.all(rho0 > 0)
-        assert set(diag["uhfe_heads"]) == set(diag["udfe_heads"])
+        assert len(diag["uhfe_heads"]) == len(diag["udfe_heads"]) == 5
+        assert set(diag["uhfe_heads"]) == set(HEAD_SUPPORT)
+        assert set(diag["udfe_heads"]) == set(INVERSE_NAMES.values())
         assert diag["uhfe_channels"].shape == (8,)
         assert diag["udfe_channels"].shape == (8,)
 
@@ -92,7 +135,6 @@ def test_optional_shape_bias_keeps_boundary_positive():
 
 
 def test_aggregate_heads_returns_eight_channels():
-    state = sample_state()
-    channels = aggregate_heads(formation_heads(state))
+    channels = aggregate_heads(formation_heads(sample_state()))
     assert channels.shape == (8,)
     assert np.all(np.isfinite(channels))

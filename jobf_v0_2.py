@@ -1,12 +1,9 @@
 #!/usr/bin/env python3
 """JOBF v0.2 — Janus Octadial Breathing Field driven by Janus Hydra.
 
-The five UHFE head projections and five paired UDFE inverse projections in
-janus_hydra.py are aggregated onto the eight V8 coordinate channels. Those
-head-derived channel fields drive the whole 8D cross-polytope boundary.
-
+All semantic interpretation is routed through hydra_semantic_reader.py:
+normalized V8 -> paired UHFE/UDFE head language -> eight V8 channels -> JOBF.
 Dependencies: numpy, matplotlib
-Run from this directory: python jobf_v0_2.py
 """
 from __future__ import annotations
 
@@ -17,26 +14,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 try:
-    from .janus_hydra import V8State, formation_heads, inverse_heads, golden_angle_phases
-except ImportError:  # direct script execution
-    from janus_hydra import V8State, formation_heads, inverse_heads, golden_angle_phases
+    from .janus_hydra import V8State, golden_angle_phases
+    from .hydra_semantic_reader import read_semantics, project_heads, HEAD_SUPPORT, INVERSE_NAMES
+except ImportError:
+    from janus_hydra import V8State, golden_angle_phases
+    from hydra_semantic_reader import read_semantics, project_heads, HEAD_SUPPORT, INVERSE_NAMES
 
 DIM = 8
 KEYS = ("h", "R", "u", "d", "tau", "chi", "s", "f")
-SUPPORT = {
-    "bubble": ("h", "R", "u"),
-    "honeycomb": ("tau", "s"),
-    "spiderweb": ("f", "h", "R"),
-    "chiraldna": ("chi", "tau", "R"),
-    "compoundeye": ("s", "h", "d"),
-}
-INVERSE_NAMES = {
-    "bubble": "antibubble_cavitation",
-    "honeycomb": "inversehoneycomb",
-    "spiderweb": "inversespiderweb_radialvoid",
-    "chiraldna": "chiralvoid",
-    "compoundeye": "discretesingulardots_inversecompoundeye",
-}
+SUPPORT = HEAD_SUPPORT
 
 
 def sphere_directions(count: int, seed: int = 19) -> np.ndarray:
@@ -51,21 +37,12 @@ def base_radius(directions: np.ndarray) -> np.ndarray:
 
 
 def aggregate_heads(head_scores: dict[str, float], inverse: bool = False) -> np.ndarray:
-    """Project five head scores back onto their supported V8 channels."""
-    sums = np.zeros(DIM, dtype=float)
-    counts = np.zeros(DIM, dtype=float)
-    for forward_name, support in SUPPORT.items():
-        name = INVERSE_NAMES[forward_name] if inverse else forward_name
-        value = float(head_scores[name])
-        for coordinate in support:
-            idx = KEYS.index(coordinate)
-            sums[idx] += value
-            counts[idx] += 1.0
-    return sums / np.maximum(counts, 1.0)
+    """Compatibility wrapper; canonical projection lives in the semantic reader."""
+    return project_heads(head_scores, inverse=inverse)
 
 
 class JanusOctadialBreathingField:
-    """JOBF dynamics with Janus Hydra head projections in the feedback path."""
+    """JOBF dynamics with the Hydra Semantic Reader as its sole semantic gateway."""
 
     def __init__(self, dt=0.01, shape_bias=0.0, softening=0.25):
         if dt <= 0 or not np.isfinite(dt):
@@ -76,7 +53,6 @@ class JanusOctadialBreathingField:
         if self.softening <= 0:
             raise ValueError("softening must be positive")
 
-        # Interior operating point; amplitudes keep every coordinate in [0,1].
         self.base = np.array([.60, .62, .58, .38, .61, .55, .64, .57])
         self.state_amp = np.array([.035, .030, .032, .028, .025, .030, .027, .033])
         self.state_omega = np.array([.83, .91, .77, 1.09, .72, .96, .88, 1.03])
@@ -88,22 +64,19 @@ class JanusOctadialBreathingField:
         self.k_h, self.k_d, self.k_hd = 1.0, 1.0, .20
         self.k_global_coupling = .12
 
-        baseline_state = self._state_at(0.0)
-        self.h_base = aggregate_heads(formation_heads(baseline_state))
-        self.d_base = aggregate_heads(inverse_heads(baseline_state), inverse=True)
+        baseline = read_semantics(self._state_at(0.0))
+        self.h_base = baseline.uhfe_channels.copy()
+        self.d_base = baseline.udfe_channels.copy()
 
     def _state_at(self, t: float) -> V8State:
         values = self.base + self.state_amp * np.cos(self.state_omega*t + self.phase)
         return V8State(**dict(zip(KEYS, map(float, values))))
 
     def fields(self, t: float):
-        """Return state, head dictionaries, and their eight-channel projections."""
-        state = self._state_at(t)
-        uh_heads = formation_heads(state)
-        ud_heads = inverse_heads(state)
-        uh_channels = aggregate_heads(uh_heads)
-        ud_channels = aggregate_heads(ud_heads, inverse=True)
-        return state, uh_heads, ud_heads, uh_channels, ud_channels
+        """Read one V8 state through the canonical Janus semantic pipeline."""
+        frame = read_semantics(self._state_at(t))
+        return (frame.state, frame.uhfe_heads, frame.udfe_heads,
+                frame.uhfe_channels, frame.udfe_channels)
 
     def channel_state(self, t: float):
         state, uh_heads, ud_heads, uh, ud = self.fields(t)
@@ -111,7 +84,6 @@ class JanusOctadialBreathingField:
         cross = uh_delta * ud_delta
         local = self.local_amp * np.cos(self.local_omega*t + self.phase_offset)
         channels = self.k_h*uh_delta - self.k_d*ud_delta + self.k_hd*cross + local
-        # A global mode plus a weak aggregate response to the two distinct fields.
         field_contrast = float(np.mean(uh_delta - ud_delta))
         global_breath = (
             self.global_amp*np.cos(self.global_omega*t)
@@ -130,7 +102,6 @@ class JanusOctadialBreathingField:
         if self.shape_bias:
             q = directions * rho0[:, None]
             r2 = np.sum(q*q, axis=1)
-            # Optional softened radial shape bias; not a gravity solver.
             exponent += -self.shape_bias / np.sqrt(r2 + self.softening**2)
         rho = rho0 * np.exp(exponent)
         diagnostics = {
@@ -190,19 +161,16 @@ def plot_diagnostics(model, times, directions, rows, snapshots, path):
     ax.plot(times, [r["baseline_mean_radius"] for r in rows], "--", label="H8 baseline")
     ax.set(title="Whole-domain breathing", xlabel="model time", ylabel="mean radius")
     ax.legend()
-
     ax = axes[0, 1]
     for key in KEYS:
         ax.plot(times, [r[f"breath_channel_{key}"] for r in rows], label=key)
-    ax.set(title="Eight Hydra-driven V8 channels", xlabel="model time", ylabel="channel deformation")
+    ax.set(title="Eight Hydra-reader-driven V8 channels", xlabel="model time", ylabel="channel deformation")
     ax.legend(ncol=2, fontsize=8)
-
     ax = axes[1, 0]
     ax.plot(times, [r["uhfe_mean"] for r in rows], label="UHFE head mean")
     ax.plot(times, [r["udfe_mean"] for r in rows], label="UDFE inverse-head mean")
     ax.set(title="Independent Janus Hydra fields", xlabel="model time", ylabel="mean head score")
     ax.legend()
-
     ax = axes[1, 1]
     for k, rho in snapshots.items():
         points = directions*rho[:, None]
@@ -210,7 +178,7 @@ def plot_diagnostics(model, times, directions, rows, snapshots, path):
     ax.set_aspect("equal", adjustable="datalim")
     ax.set(title="2D projection of sampled 8D boundary", xlabel="q1", ylabel="q2")
     ax.legend(fontsize=7)
-    fig.suptitle("JOBF v0.2 — Janus Hydra-driven breathing field")
+    fig.suptitle("JOBF v0.2 — Janus Hydra semantic-reader-driven breathing field")
     fig.savefig(path, dpi=180)
     plt.close(fig)
 
@@ -220,8 +188,7 @@ def main():
     parser.add_argument("--steps", type=int, default=1200)
     parser.add_argument("--dt", type=float, default=.01)
     parser.add_argument("--samples", type=int, default=4096)
-    parser.add_argument("--shape-bias", type=float, default=0.0,
-                        help="optional softened radial shape bias; default off")
+    parser.add_argument("--shape-bias", type=float, default=0.0)
     parser.add_argument("--output", type=Path, default=Path("jobf_output"))
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)

@@ -1,108 +1,88 @@
-# Janus Hydra geometric language
+# PAN V8 Janus Hydra Semantic Pipeline
 
-**Status:** PAN V8 research specification. These are computational geometric mappings and metaphors, not claims of a new physical field theory.
+**Status:** Open computational research specification. These mappings are geometric/semantic engineering constructs, not claims of a new physical field theory.
 
-## Canonical domain
+## Canonical execution path
 
-\[
-V_8=(h,R,u,d,\tau,\chi,s,f)
-\]
+The **Hydra Semantic Reader is the primary semantic gateway into V8 and JOBF**:
 
-The coordinates are Harmonic Coherence, Recursive Depth, Constructive Polarity, Decoherence, Temporal Persistence, Chirality/Orientation, Information Density, and Forcing/Fractal Forcing Index.
+`source / calibrated semantic input
+  -> hydra_semantic_reader.coerce_v8_state
+  -> Janus Hydra UHFE + UDFE interpretation
+  -> explicit paired-head record
+  -> two eight-channel V8 projections
+  -> JOBF field coupling / boundary evaluation`
 
-The geometry remains the **whole** 8D cross-polytope:
+All normalized inputs are validated against the canonical V8 order:
 
-\[
-\mathcal H_8=\{q\in\mathbb R^8:\sum_{i=1}^8|q_i|\leq1\},\qquad
-\rho_0(n)=\frac{1}{\sum_i|n_i|}
-\]
+`V8 = (h, R, u, d, tau, chi, s, f)`
 
-for unit direction n. The origin is the shared waist/reference point. UHFE and UDFE are distinct, independently evolving fields over the same complete domain. Do not split the polytope into formation and dissolution halves.
+The reader accepts a `V8State`, a mapping using those exact coordinate names, or an eight-value sequence in that order. The provisional `T` alias is accepted for `tau` only when `tau` is not also supplied. Inputs outside [0,1], missing coordinates, and unexpected keys are rejected; values are never silently clamped.
 
-## Five UHFE heads and inverse UDFE language
+The reader returns a `HydraSemanticFrame` containing the validated state, five UHFE heads, five distinctly named UDFE inverse heads, explicit pair records, and two independent eight-channel projections. JOBF and the observational/GRMHD ingestion bridge consume this frame rather than reimplementing the semantic mapping.
 
-| UHFE head | V8 projection | Geometric meaning | UDFE inverse language |
-|---|---|---|---|
-| Bubble | (h,R,u) | constructive expansion / transition envelope | AntiBubble / Cavitation |
-| Honeycomb | (τ,s) | persistent information packing / tessellation | InverseHoneycomb / vacancies |
-| SpiderWeb | (f,h,R) | recursive forcing network / boundary connectivity | InverseSpiderWeb / RadialVoid |
-| ChiralDNA | (χ,τ,R) | oriented, persistent recursive helix | ChiralVoid |
-| CompoundEye | (s,h,d) | multi-aperture sampling and coherence/decoherence contrast | DiscreteSingularDots / InverseCompoundEye |
+## Janus Hydra vocabulary
 
-Baseline scalar projections:
+Janus Hydra is the canonical name for the coupled formation/dissolution semantic architecture. UHFE and UDFE are not two halves of the geometry: they are distinct semantic fields evaluated over the same complete V8 domain.
 
-\[
-B=(h+R+u)/3,\quad H=(\tau+s)/2,\quad W=(f+h+R)/3
-\]
-\[
-C=(\chi+\tau+R)/3,\quad E=(s+h+d)/3.
-\]
+| UHFE head | V8 support | UDFE inverse head |
+|---|---|---|
+| Bubble | (h, R, u) | `antibubble_cavitation` |
+| Honeycomb | (tau, s) | `inversehoneycomb` |
+| SpiderWeb | (f, h, R) | `inversespiderweb_radialvoid` |
+| ChiralDNA | (chi, tau, R) | `chiralvoid` |
+| CompoundEye | (s, h, d) | `discretesingulardots_inversecompoundeye` |
 
-The default normalized complement is \(\mathcal C(x)=1-x\), so \(\mathcal C(\mathcal C(x))=x\). The reference inverse scores are:
+The inverse names are intentionally not renamed to match the UHFE keys. The semantic reader pairs them explicitly, preserving the Janus distinction and the provenance of each inverse rule.
 
-\[
+Baseline UHFE scores:
+
+[
+B=(h+R+u)/3,quad H=(tau+s)/2,quad W=(f+h+R)/3
+]
+[
+C=(chi+tau+R)/3,quad E=(s+h+d)/3.
+]
+
+The normalized complement is (C(x)=1-x), with (C(C(x))=x). The reference UDFE scores are:
+
+[
 B^-=(d+(1-u)+(1-h))/3
-\]
-\[
-H^-=((1-\tau)+(1-s))/2,\quad
-W^-=((1-f)+(1-h)+(1-R))/3
-\]
-\[
-C^-=((1-\chi)+(1-\tau)+(1-R))/3
-\]
-\[
-E^-=((1-s)+(1-h)+d)/3.
-\]
+]
+[
+H^-=((1-tau)+(1-s))/2,quad W^-=((1-f)+(1-h)+(1-R))/3
+]
+[
+C^-=((1-chi)+(1-tau)+(1-R))/3,quad E^-=((1-s)+(1-h)+d)/3.
+]
 
-The d term is deliberately retained in AntiBubble and inverse CompoundEye as a dissolution-side signal, following the project's semantic mapping. This is a design choice, not a mathematical necessity; preserve it as a versioned rule.
+The d term is deliberately retained in AntiBubble and inverse CompoundEye as a dissolution-side signal. Preserve this as a versioned semantic rule.
 
-## Independent fields and interference
+## Shared geometry and independent fields
 
-Define independent histories \(U_H(n,t)\) and \(U_D(n,t)\), with separately configurable amplitudes, frequencies, phases, and spatial profiles. Do not force \(U_D=1-U_H\). A centered interaction is:
+The geometric domain remains the whole 8D cross-polytope:
 
-\[
-I(n,t)=(U_H-\bar U_H)(U_D-\bar U_D).
-\]
+[
+H_8={qin R^8:sum_i |q_i|leq1},quad rho_0(n)=1/sum_i|n_i|
+]
 
-One candidate boundary law is:
+for unit direction n. The origin is the shared waist/reference point. Do not split the polytope into formation and dissolution halves.
 
-\[
-\rho(n,t)=\rho_0(n)\exp[g(t)+\lambda_H\delta U_H(n,t)
--\lambda_D\delta U_D(n,t)+\lambda_{HD}I(n,t)].
-\]
+UHFE and UDFE maintain independent histories and parameters. Do not impose (U_D=1-U_H). JOBF uses centered field deviations and an explicit interaction term to deform the radial boundary. For finite exponents, the exponential radial law remains positive. This is a candidate computational shape-evolution rule, not a law derived from physics.
 
-This guarantees positive radius for finite inputs. It is a proposed shape-evolution rule, not a law derived from physics.
+The eight V8 coordinate channels are distinct from the 256 sign orthants of R^8. Sign-symmetric directional weights use (w_i=n_i^2/sum_j n_j^2); chirality requires a separately specified orientation-sensitive operator.
 
-## Octadial channels and orientation
+## Validation contract
 
-The eight V8 coordinate axes are the eight named channels; they are not the 256 sign orthants of \(\mathbb R^8\). For a nonzero direction n:
+1. V8 order is stable: (h, R, u, d, tau, chi, s, f).
+2. The reader rejects malformed, non-finite, and out-of-range inputs.
+3. Exactly five UHFE and five UDFE heads are produced with their own vocabulary.
+4. Each UHFE head is explicitly paired to its named UDFE inverse.
+5. Both projections contain eight finite channels over the same domain.
+6. The origin remains shared; the domain is not divided into two half-polytopes.
+7. Finite JOBF inputs produce finite positive radial boundaries.
+8. Numerical success validates implementation invariants, not a physical interpretation.
 
-\[
-w_i(n)=\frac{n_i^2}{\sum_j n_j^2}.
-\]
+## Data ingestion
 
-These weights are sign-symmetric. Chirality must therefore enter through a separately specified orientation-sensitive operator using χ or signed directional terms.
-
-Golden-angle phase offsets may be scheduled with:
-
-\[
-\theta_G=2\pi/\phi^2,\quad \phi=(1+\sqrt5)/2,\quad
-\varphi_i=i\theta_G.
-\]
-
-This is a phase-scheduling heuristic, not an 8D rotation group.
-
-## Kernel invariants
-
-1. Both fields cover the same complete 8D domain; no half-polytope assignment.
-2. q=0 remains the shared reference point.
-3. Radial boundary remains positive for finite model inputs.
-4. Complement is involutive on normalized values.
-5. Every inverse head retains pairing and operator provenance.
-6. UHFE and UDFE can have different histories and parameters.
-7. V8 coordinate order is preserved: (h,R,u,d,τ,χ,s,f).
-8. Report invalid inputs and numerical convergence; never silently clamp raw values.
-
-## Separation from JOBF
-
-The fractal kernel owns V8 projections, geometric vocabulary, inverse mappings, and invariants. JOBF owns time evolution, independent field histories, interference, radial deformation, and diagnostics. E8 roots or other symmetry layers must be added separately with an explicit map into V8; they are not implicitly implemented here.
+Gaia DR3 and GRMHD adapters map their source observables/primitives into provisional normalized V8 proxy vectors. Those vectors must pass through the Hydra Semantic Reader before JOBF. The proxy mappings remain engineering assumptions, not direct measurements of V8 semantics; retain source values and provenance and do not conflate datasets without calibration.
