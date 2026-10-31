@@ -5,7 +5,7 @@ from janus_hydra import (
     V8State, complement, formation_heads, inverse_heads, paired_heads,
     cross_polytope_radius, octadial_weights, golden_angle_phases,
 )
-from hydra_semantic_reader import read_semantics, coerce_v8_state, project_heads, INVERSE_NAMES
+from hydra_semantic_reader import read_semantics, coerce_v8_state, project_heads, INVERSE_NAMES, HEAD_SUPPORT
 from jobf_v0_2 import JanusOctadialBreathingField, sphere_directions, base_radius, aggregate_heads
 
 

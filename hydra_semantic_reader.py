@@ -68,7 +68,7 @@ def coerce_v8_state(source: V8State | Mapping | Sequence[float]) -> V8State:
                 f"unexpected={sorted(extra)}"
             )
         state = V8State(**{key: float(values[key]) for key in V8_KEYS})
-    elif isinstance(source, Sequence) and not isinstance(source, (str, bytes)):
+    elif (isinstance(source, Sequence) or isinstance(source, np.ndarray)) and not isinstance(source, (str, bytes)):
         if len(source) != 8:
             raise ValueError("Ordered V8 input must contain exactly 8 values")
         state = V8State(**dict(zip(V8_KEYS, map(float, source))))
