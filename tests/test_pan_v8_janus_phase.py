@@ -67,11 +67,16 @@ def test_bad_semantic_input_does_not_consume_pulse_or_timestamp():
 
 def test_timestamp_must_be_monotonic_and_reference_finite():
     model = coupler()
+    # Invalid reference must fail before consuming time or a pulse.
     with pytest.raises(ValueError):
         model.step(1.0, BASE, geometric_reference_phase=math.nan)
-    with pytest.raises(ValueError):
-        model.step(1.0, BASE)
     assert model.pulse_index == 0
+
+    # A valid timestamp advances the model; a later backward timestamp fails.
+    model.step(1.0, BASE)
+    with pytest.raises(ValueError):
+        model.step(0.5, BASE)
+    assert model.pulse_index == 1
 
 
 def test_invalid_temperature_rejected():
