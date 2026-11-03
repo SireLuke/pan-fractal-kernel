@@ -46,7 +46,10 @@ class CrossPolytopeAdapter:
 def _gosset_halfspaces() -> tuple[np.ndarray, np.ndarray]:
     """Build and cache ConvexHull inequalities for conv(E8 roots)."""
     from scipy.spatial import ConvexHull, QhullError
-    try:\n        from .gosset_421 import E8_ROOTS\n    except ImportError:\n        from gosset_421 import E8_ROOTS
+    try:
+        from .gosset_421 import E8_ROOTS
+    except ImportError:
+        from gosset_421 import E8_ROOTS
 
     try:
         hull = ConvexHull(np.asarray(E8_ROOTS, dtype=float))
