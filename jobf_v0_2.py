@@ -63,6 +63,8 @@ class JanusOctadialBreathingField:
         self.state_omega = np.array([.83, .91, .77, 1.09, .72, .96, .88, 1.03])
         self.phase = np.asarray(golden_angle_phases())
         self.phase_offset = self.phase[::-1].copy()
+        self._cached_directions = None
+        self._cached_base_radius = None
 
         self.global_amp, self.global_omega = .10, 1.0
         self.local_amp, self.local_omega = .045, 1.17
@@ -99,7 +101,15 @@ class JanusOctadialBreathingField:
     def boundary(self, directions: np.ndarray, t: float):
         if directions.ndim != 2 or directions.shape[1] != DIM:
             raise ValueError("directions must have shape (N, 8)")
-        rho0 = self.geometry.radial_boundary_many(directions)
+        # Directions are fixed across JOBF time steps. Cache the expensive
+        # base geometry evaluation so the Gosset facet intersections happen
+        # once per sampled direction set, not once per simulation frame.
+        if (self._cached_directions is None
+                or self._cached_directions.shape != directions.shape
+                or not np.array_equal(self._cached_directions, directions)):
+            self._cached_directions = np.array(directions, dtype=float, copy=True)
+            self._cached_base_radius = self.geometry.radial_boundary_many(directions)
+        rho0 = self._cached_base_radius
         weights = directions**2
         weights /= weights.sum(axis=1, keepdims=True)
         gb, channels, state, uh_heads, ud_heads, uh, ud, cross = self.channel_state(t)
