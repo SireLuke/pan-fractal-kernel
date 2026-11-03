@@ -172,3 +172,43 @@ def test_jobf_defaults_to_gosset_and_allows_explicit_legacy_geometry():
     dirs = sphere_directions(16, seed=11)
     _, _, _, diag = model.boundary(dirs, .2)
     assert diag["geometry"] == "gosset_4_21_e8_root_polytope"
+
+
+
+def test_gosset_facet_radial_matches_reference_linear_program():
+    from gosset_421 import radial_boundary
+    pytest.importorskip("scipy")
+    adapter = Gosset421Adapter()
+    dirs = sphere_directions(3, seed=123)
+    fast = adapter.radial_boundary_many(dirs)
+    reference = np.array([radial_boundary(row) for row in dirs])
+    assert fast == pytest.approx(reference, abs=1e-7)
+
+
+def test_geometry_adapters_reject_zero_and_nonfinite_directions():
+    adapter = Gosset421Adapter()
+    with pytest.raises(ValueError):
+        adapter.radial_boundary_many(np.zeros((1, 8)))
+    invalid = np.ones((1, 8))
+    invalid[0, 0] = np.nan
+    with pytest.raises(ValueError):
+        adapter.radial_boundary_many(invalid)
+
+
+def test_jobf_caches_base_geometry_for_repeated_direction_samples():
+    class CountingGeometry:
+        name = "counting_test_geometry"
+        def __init__(self):
+            self.calls = 0
+        def radial_boundary_many(self, directions):
+            self.calls += 1
+            return np.ones(len(directions), dtype=float)
+
+    geometry = CountingGeometry()
+    model = JanusOctadialBreathingField(geometry=geometry)
+    dirs = sphere_directions(32, seed=5)
+    model.boundary(dirs, 0.0)
+    model.boundary(dirs, 0.1)
+    assert geometry.calls == 1
+    model.boundary(dirs.copy(), 0.2)
+    assert geometry.calls == 1
