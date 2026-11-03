@@ -60,17 +60,21 @@ The d term is deliberately retained in AntiBubble and inverse CompoundEye as a d
 
 ## Shared geometry and independent fields
 
-The geometric domain remains the whole 8D cross-polytope:
+The primary shared geometric domain is the **Gosset 4_21 polytope**, the convex hull of the 240 E8 roots in R^8. The canonical root normalization is ||alpha||^2=2. Its 1-skeleton has 240 vertices, 56 nearest neighbors per vertex, and 6,720 edges. See `GOSSET_421_GEOMETRY.md` and `gosset_421.py` for the exact root construction and invariants.
+
+JOBF evaluates the radial function of this convex body from the shared origin. For a unit direction n,
 
 [
-H_8={qin R^8:sum_i |q_i|leq1},quad rho_0(n)=1/sum_i|n_i|
+rho_G(n)=max{r >= 0 : r n in conv(E8_ROOTS)}.
 ]
 
-for unit direction n. The origin is the shared waist/reference point. Do not split the polytope into formation and dissolution halves.
+The implementation uses a cached convex-hull facet representation and vectorized ray/facet intersections. It does **not** use the support function as though it were the radial function, and it does not solve one linear program per sample in the simulation hot loop. The optional LP in `gosset_421.py` remains a reference/checking method.
 
-UHFE and UDFE maintain independent histories and parameters. Do not impose (U_D=1-U_H). JOBF uses centered field deviations and an explicit interaction term to deform the radial boundary. For finite exponents, the exponential radial law remains positive. This is a candidate computational shape-evolution rule, not a law derived from physics.
+The 8D cross-polytope H8={q in R^8: sum_i |q_i|<=1} is retained as an explicitly named legacy/comparison geometry, with radial function rho_H(n)=1/sum_i|n_i| for unit n. It is not interchangeable with Gosset 4_21 and is no longer the JOBF default. Select it explicitly with `geometry="cross_polytope"` or the CLI option `--geometry cross_polytope`; the default is `geometry="gosset"`.
 
-The eight V8 coordinate channels are distinct from the 256 sign orthants of R^8. Sign-symmetric directional weights use (w_i=n_i^2/sum_j n_j^2); chirality requires a separately specified orientation-sensitive operator.
+The origin is the shared waist/reference point. UHFE and UDFE are not assigned opposite geometric halves and are not split into separate domains. They maintain independent histories and parameters. Do not impose (U_D=1-U_H). JOBF uses centered field deviations and an explicit interaction term to deform the chosen base radial boundary. For finite exponents, the exponential radial law remains positive. This is a candidate computational shape-evolution rule, not a law derived from physics.
+
+The eight V8 coordinate channels remain distinct from the 256 sign orthants of R^8 and from the 240 E8 root vertices. Sign-symmetric directional weights use (w_i=n_i^2/sum_j n_j^2); chirality requires a separately specified orientation-sensitive operator. The geometry adapter changes the spatial boundary calculation only; it does not mutate V8 records or alter UHFE/UDFE head semantics.
 
 ## Validation contract
 
@@ -80,8 +84,10 @@ The eight V8 coordinate channels are distinct from the 256 sign orthants of R^8.
 4. Each UHFE head is explicitly paired to its named UDFE inverse.
 5. Both projections contain eight finite channels over the same domain.
 6. The origin remains shared; the domain is not divided into two half-polytopes.
-7. Finite JOBF inputs produce finite positive radial boundaries.
-8. Numerical success validates implementation invariants, not a physical interpretation.
+7. Finite JOBF inputs produce finite positive radial boundaries under the selected adapter.
+8. Gosset 4_21 is the default JOBF geometry; cross-polytope H8 remains explicitly selectable as a comparison baseline.
+9. Geometry selection does not alter V8 coordinate order, semantic head values, or the paired UHFE/UDFE records.
+10. Numerical success validates implementation invariants, not a physical interpretation.
 
 ## Data ingestion
 

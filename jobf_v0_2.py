@@ -16,9 +16,11 @@ import matplotlib.pyplot as plt
 try:
     from .janus_hydra import V8State, golden_angle_phases
     from .hydra_semantic_reader import read_semantics, project_heads, HEAD_SUPPORT, INVERSE_NAMES
+    from .geometry_adapter import CrossPolytopeAdapter, get_geometry
 except ImportError:
     from janus_hydra import V8State, golden_angle_phases
     from hydra_semantic_reader import read_semantics, project_heads, HEAD_SUPPORT, INVERSE_NAMES
+    from geometry_adapter import CrossPolytopeAdapter, get_geometry
 
 DIM = 8
 KEYS = ("h", "R", "u", "d", "tau", "chi", "s", "f")
@@ -32,8 +34,8 @@ def sphere_directions(count: int, seed: int = 19) -> np.ndarray:
 
 
 def base_radius(directions: np.ndarray) -> np.ndarray:
-    """Radial function for H8={q: sum_i |q_i| <= 1}, unit directions."""
-    return 1.0 / np.maximum(np.abs(directions).sum(axis=1), 1e-12)
+    """Legacy H8 cross-polytope radial function; kept for explicit comparison."""
+    return CrossPolytopeAdapter().radial_boundary_many(directions)
 
 
 def aggregate_heads(head_scores: dict[str, float], inverse: bool = False) -> np.ndarray:
@@ -44,12 +46,15 @@ def aggregate_heads(head_scores: dict[str, float], inverse: bool = False) -> np.
 class JanusOctadialBreathingField:
     """JOBF dynamics with the Hydra Semantic Reader as its sole semantic gateway."""
 
-    def __init__(self, dt=0.01, shape_bias=0.0, softening=0.25):
+    def __init__(self, dt=0.01, shape_bias=0.0, softening=0.25, geometry="gosset"):
         if dt <= 0 or not np.isfinite(dt):
             raise ValueError("dt must be finite and positive")
         self.dt = float(dt)
         self.shape_bias = float(shape_bias)
         self.softening = float(softening)
+        self.geometry = get_geometry(geometry) if isinstance(geometry, str) else geometry
+        if not hasattr(self.geometry, "radial_boundary_many"):
+            raise TypeError("geometry must provide radial_boundary_many(directions)")
         if self.softening <= 0:
             raise ValueError("softening must be positive")
 
@@ -58,6 +63,8 @@ class JanusOctadialBreathingField:
         self.state_omega = np.array([.83, .91, .77, 1.09, .72, .96, .88, 1.03])
         self.phase = np.asarray(golden_angle_phases())
         self.phase_offset = self.phase[::-1].copy()
+        self._cached_directions = None
+        self._cached_base_radius = None
 
         self.global_amp, self.global_omega = .10, 1.0
         self.local_amp, self.local_omega = .045, 1.17
@@ -94,7 +101,15 @@ class JanusOctadialBreathingField:
     def boundary(self, directions: np.ndarray, t: float):
         if directions.ndim != 2 or directions.shape[1] != DIM:
             raise ValueError("directions must have shape (N, 8)")
-        rho0 = base_radius(directions)
+        # Directions are fixed across JOBF time steps. Cache the expensive
+        # base geometry evaluation so the Gosset facet intersections happen
+        # once per sampled direction set, not once per simulation frame.
+        if (self._cached_directions is None
+                or self._cached_directions.shape != directions.shape
+                or not np.array_equal(self._cached_directions, directions)):
+            self._cached_directions = np.array(directions, dtype=float, copy=True)
+            self._cached_base_radius = self.geometry.radial_boundary_many(directions)
+        rho0 = self._cached_base_radius
         weights = directions**2
         weights /= weights.sum(axis=1, keepdims=True)
         gb, channels, state, uh_heads, ud_heads, uh, ud, cross = self.channel_state(t)
@@ -108,6 +123,7 @@ class JanusOctadialBreathingField:
             "global_breath": gb, "channels": channels, "state": state,
             "uhfe_heads": uh_heads, "udfe_heads": ud_heads,
             "uhfe_channels": uh, "udfe_channels": ud, "interference": cross,
+            "geometry": self.geometry.name,
         }
         return rho, rho0, exponent, diagnostics
 
@@ -189,17 +205,19 @@ def main():
     parser.add_argument("--dt", type=float, default=.01)
     parser.add_argument("--samples", type=int, default=4096)
     parser.add_argument("--shape-bias", type=float, default=0.0)
+    parser.add_argument("--geometry", choices=("gosset", "cross_polytope"), default="gosset",
+                        help="Primary Gosset 4_21 geometry or explicit legacy H8 comparison.")
     parser.add_argument("--output", type=Path, default=Path("jobf_output"))
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
-    model = JanusOctadialBreathingField(args.dt, args.shape_bias)
+    model = JanusOctadialBreathingField(args.dt, args.shape_bias, geometry=args.geometry)
     times, directions, rows, snapshots = model.simulate(args.steps, args.samples)
     csv_path = args.output/"jobf_v0_2_metrics.csv"
     png_path = args.output/"jobf_v0_2_diagnostics.png"
     write_metrics(rows, csv_path)
     plot_diagnostics(model, times, directions, rows, snapshots, png_path)
     print("JOBF v0.2 complete")
-    print(f"steps={args.steps}; dt={args.dt}; samples={args.samples}")
+    print(f"steps={args.steps}; dt={args.dt}; samples={args.samples}; geometry={model.geometry.name}")
     print(f"all_boundaries_positive={all(r['boundary_positive'] for r in rows)}")
     print(f"mean_radius_range=({min(r['mean_radius'] for r in rows):.6f}, "
           f"{max(r['mean_radius'] for r in rows):.6f})")

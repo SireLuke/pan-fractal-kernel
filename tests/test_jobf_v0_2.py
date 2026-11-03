@@ -7,6 +7,7 @@ from janus_hydra import (
 )
 from hydra_semantic_reader import read_semantics, coerce_v8_state, project_heads, INVERSE_NAMES, HEAD_SUPPORT
 from jobf_v0_2 import JanusOctadialBreathingField, sphere_directions, base_radius, aggregate_heads
+from geometry_adapter import Gosset421Adapter, CrossPolytopeAdapter
 
 
 def sample_state():
@@ -138,3 +139,76 @@ def test_aggregate_heads_returns_eight_channels():
     channels = aggregate_heads(formation_heads(sample_state()))
     assert channels.shape == (8,)
     assert np.all(np.isfinite(channels))
+
+
+def test_gosset_adapter_matches_symmetric_reference_radii():
+    adapter = Gosset421Adapter()
+    axis = np.array([[1., 0., 0., 0., 0., 0., 0., 0.]])
+    diagonal = np.ones((1, 8))
+    assert adapter.radial_boundary_many(axis)[0] == pytest.approx(1.0, abs=1e-7)
+    assert adapter.radial_boundary_many(diagonal)[0] == pytest.approx(np.sqrt(2.0), abs=1e-7)
+
+
+def test_gosset_adapter_is_scale_and_sign_invariant():
+    adapter = Gosset421Adapter()
+    dirs = sphere_directions(12, seed=41)
+    r1 = adapter.radial_boundary_many(dirs)
+    r2 = adapter.radial_boundary_many(-3.0 * dirs)
+    assert r1 == pytest.approx(r2, abs=1e-8)
+
+
+def test_legacy_cross_polytope_adapter_is_explicit_and_unchanged():
+    adapter = CrossPolytopeAdapter()
+    dirs = sphere_directions(24, seed=7)
+    assert adapter.name == "cross_polytope_h8"
+    assert adapter.radial_boundary_many(dirs) == pytest.approx(1.0 / np.abs(dirs).sum(axis=1))
+
+
+def test_jobf_defaults_to_gosset_and_allows_explicit_legacy_geometry():
+    model = JanusOctadialBreathingField()
+    assert model.geometry.name == "gosset_4_21_e8_root_polytope"
+    legacy = JanusOctadialBreathingField(geometry="cross_polytope")
+    assert legacy.geometry.name == "cross_polytope_h8"
+    dirs = sphere_directions(16, seed=11)
+    _, _, _, diag = model.boundary(dirs, .2)
+    assert diag["geometry"] == "gosset_4_21_e8_root_polytope"
+
+
+
+def test_gosset_facet_radial_matches_reference_linear_program():
+    from gosset_421 import radial_boundary
+    pytest.importorskip("scipy")
+    adapter = Gosset421Adapter()
+    dirs = sphere_directions(3, seed=123)
+    fast = adapter.radial_boundary_many(dirs)
+    reference = np.array([radial_boundary(row) for row in dirs])
+    assert fast == pytest.approx(reference, abs=1e-7)
+
+
+def test_geometry_adapters_reject_zero_and_nonfinite_directions():
+    adapter = Gosset421Adapter()
+    with pytest.raises(ValueError):
+        adapter.radial_boundary_many(np.zeros((1, 8)))
+    invalid = np.ones((1, 8))
+    invalid[0, 0] = np.nan
+    with pytest.raises(ValueError):
+        adapter.radial_boundary_many(invalid)
+
+
+def test_jobf_caches_base_geometry_for_repeated_direction_samples():
+    class CountingGeometry:
+        name = "counting_test_geometry"
+        def __init__(self):
+            self.calls = 0
+        def radial_boundary_many(self, directions):
+            self.calls += 1
+            return np.ones(len(directions), dtype=float)
+
+    geometry = CountingGeometry()
+    model = JanusOctadialBreathingField(geometry=geometry)
+    dirs = sphere_directions(32, seed=5)
+    model.boundary(dirs, 0.0)
+    model.boundary(dirs, 0.1)
+    assert geometry.calls == 1
+    model.boundary(dirs.copy(), 0.2)
+    assert geometry.calls == 1

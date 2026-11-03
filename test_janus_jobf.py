@@ -33,7 +33,7 @@ class JanusHydraJobfTests(unittest.TestCase):
         self.assertTrue(np.all(np.isfinite(rho)))
         self.assertTrue(np.all(rho > 0))
 
-    def test_cross_polytope_domain_not_split(self):
+    def test_shared_domain_contains_antipodal_directions(self):
         directions = np.vstack([np.eye(8), -np.eye(8)])
         rho, rho0, _, _ = self.model.boundary(directions, .2)
         self.assertEqual(rho.shape, (16,))
