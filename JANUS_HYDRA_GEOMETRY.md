@@ -84,7 +84,9 @@ The eight V8 coordinate channels remain distinct from the 256 sign orthants of R
 4. Each UHFE head is explicitly paired to its named UDFE inverse.
 5. Both projections contain eight finite channels over the same domain.
 6. The origin remains shared; the domain is not divided into two half-polytopes.
-7. Finite JOBF inputs produce finite positive radial boundaries under the selected adapter.\n8. Gosset 4_21 is the default JOBF geometry; cross-polytope H8 remains explicitly selectable as a comparison baseline.\n9. Geometry selection does not alter V8 coordinate order, semantic head values, or the paired UHFE/UDFE records.
+7. Finite JOBF inputs produce finite positive radial boundaries under the selected adapter.
+8. Gosset 4_21 is the default JOBF geometry; cross-polytope H8 remains explicitly selectable as a comparison baseline.
+9. Geometry selection does not alter V8 coordinate order, semantic head values, or the paired UHFE/UDFE records.
 10. Numerical success validates implementation invariants, not a physical interpretation.
 
 ## Data ingestion
