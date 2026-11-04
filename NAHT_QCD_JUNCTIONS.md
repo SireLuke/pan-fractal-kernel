@@ -105,6 +105,32 @@ For two closed-loop transporters based at the same point and represented in a co
 
 The scalar Tr(F_munu F^munu) is gauge invariant, but in Lorentzian signature it is not generally a positive-definite norm. A positive diagnostic requires a declared metric/signature or suitable Euclideanized quantity.
 
+## 4.3 SU(2) as a complementary transport layer
+
+SU(2) is useful here, but it should have a different job from SU(3).
+
+- **SU(2):** a compact two-state / spinor transport primitive. It is a natural place to prototype ordered rotations, doublet phase, spin-like state transport, and holonomy with a small, exactly testable representation.
+- **SU(3):** the eight-generator color gauge group relevant to QCD. Keep this as the QCD-motivated non-Abelian adapter when a three-color gauge structure is actually required.
+- **NAHT three-channel vector:** the PAN history bookkeeping state. It is neither an SU(2) doublet nor an SU(3) color triplet.
+
+The fundamental representation of SU(2) is two-dimensional, and SU(2) is isomorphic to the unit-quaternion group. The new `naht_su2.py` module uses unit quaternions to represent SU(2) elements, compose path segments in order, compute inverses and traces, and expose the equivalent 2x2 special-unitary matrix. This is a lightweight test bed for noncommutative transport before adding a larger matrix backend.
+
+A useful future coupling is a product-space state such as
+
+\\[
+\\mathbb C^2\\otimes\\mathbb C^3
+\\]
+
+only if the model genuinely needs independent SU(2)-doublet and SU(3)-triplet factors. This gives a six-dimensional complex representation space; it is not automatically implied by using both groups. Operators must declare which factor they act on (for example, \\(U_2\\otimes I_3\\) versus \\(I_2\\otimes U_3\\)). Do not collapse the groups into one another or identify either factor with the PAN V8 axes.
+
+For a staged implementation:
+1. Use SU(2) to validate ordered two-state transport, inverse/composition, unitarity, determinant one, and path-order sensitivity.
+2. Keep the three-channel \\(\\mathbf q\\) state as the semantic history record.
+3. Add SU(3) only behind its own generator, connection, gauge-transformation, and Wilson-loop tests.
+4. Introduce a tensor-product representation only when a concrete coupled-state calculation requires it.
+
+The SU(2) helper is a mathematical transport primitive; it does not claim that a PAN state is a physical spinor or that an SU(2) degree of freedom is present in QCD's color sector.
+
 ## 5. Baryonic network geometries as NAHT test topologies
 
 For three source positions x_1, x_2, x_3, define two competing network models.
@@ -142,7 +168,7 @@ with an ansatz
 V_\Delta=V_{\mathrm{Coulomb}}+\sigma L_\Delta^{\mathrm{pair}}+\mu_\Delta.
 \]
 
-The factor one-half is a common convention when comparing the pairwise sum with a mesonic string-tension normalization; record the convention rather than treating it as universal.
+The half-perimeter can be written either as \\(L_\\Delta^{\\rm eff}=\\tfrac12(r_{12}+r_{23}+r_{31})\\) with the mesonic string tension multiplying it, or as the full perimeter with a Delta string-tension coefficient one-half as large. These are equivalent conventions only when the coefficient is changed consistently. The software helper returns the half-perimeter geometric measure; it does not compare fitted physical potentials or select a winning ansatz.
 
 Y and Delta are competing effective descriptions of the three-source potential/flux organization. Avoid saying Delta is universally the literal short-distance flux-tube topology and Y universally takes over at one sharp distance. Lattice results are geometry- and setup-dependent; the transition is not a universal hard switch. At sufficiently short distances, Coulombic contributions and the breakdown of a thin-string picture matter.
 
@@ -207,7 +233,7 @@ No identification is made between the 240 E8 roots, eight SU(3) generators, thre
 | Gauge covariance | Apply local frame transformation | Verify endpoint transformation of open transporters |
 | Wilson-loop invariance | Transform a closed loop | Verify loop-trace invariance within tolerance |
 | Junction geometry | Symmetric/asymmetric source triangles | Recover 120-degree junction when applicable and vertex solution for angle >=120 degrees |
-| Y-vs-Delta comparison | Sweep triangle shape and scale | Compare objective values without a universal switch distance |
+| Y-vs-Delta comparison | Sweep triangle shape and scale | Compare geometric measures and separately fitted potential ansatze; do not infer a physical winner from lengths alone |
 | Profile fitting | Generate or ingest transverse profiles | Compare exponential and alternative fits |
 | UHFE/UDFE coupling | Run formation and inverse semantic inputs | Preserve independent histories and inverse-head vocabulary |
 | E8 integration | Project declared observables into Gosset adapter | Confirm no mutation of roots or canonical V8 records |
