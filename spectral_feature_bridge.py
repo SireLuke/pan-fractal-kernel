@@ -113,6 +113,15 @@ def extract_spectral_features(
         )
         if spec.key not in source_values:
             raise KeyError(f"{spec.source} observation has no key {spec.key!r}")
+        if spec.source == "raw":
+            declared_unit = observation.units.get(spec.key)
+            if declared_unit is None:
+                raise ValueError(f"raw observation has no unit declaration for {spec.key!r}")
+            if spec.unit != declared_unit:
+                raise ValueError(
+                    f"feature {spec.name!r} unit {spec.unit!r} does not match "
+                    f"raw observation unit {declared_unit!r}"
+                )
         value = _reduce(source_values[spec.key], spec.reducer, spec.key)
         extracted[spec.name] = {
             "value": value,
