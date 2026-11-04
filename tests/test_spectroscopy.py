@@ -65,7 +65,7 @@ def test_proton_larmor_frequency_and_chemical_shift():
     gamma_proton = 2.6752218744e8  # rad s^-1 T^-1
     operating = larmor_frequency_hz(gamma_proton, 9.4)
     assert operating == pytest.approx(400.2e6, rel=2e-3)
-    assert chemical_shift_ppm(operating + 400.2, operating, operating) == pytest.approx(1.0)
+    assert chemical_shift_ppm(operating * (1.0 + 1.0e-6), operating, operating) == pytest.approx(1.0)
 
 
 def test_rydberg_balmer_alpha_is_visible_red_line():
