@@ -82,3 +82,24 @@ Spectral ingestion is deliberately separate from V8 projection. No spectral
 quantity is silently assigned to a V8 coordinate. A later, separately
 validated adapter may compute explicit features or model projections while
 retaining the raw observation and its provenance unchanged.
+
+## Spectral feature bridge
+
+- `spectral_feature_bridge.py`: caller-declared feature extraction from raw
+  or derived observation fields using scalar, mean, min, max, or RMS reducers.
+- `FeatureSpec` requires an explicit source, key, unit label, and reducer;
+  modality names never trigger hidden feature selection.
+- `project_features_to_v8()`: opt-in linear mapping into all eight canonical
+  V8 coordinates. Every coordinate requires an explicit mapping, with optional
+  explicit offsets. No implicit clipping, normalization, or coordinate
+  semantics are introduced.
+- `V8Projection` retains the observation ID/digest, feature-vector digest,
+  and canonical mapping record including feature units.
+- `tests/test_spectral_feature_bridge.py`: extraction, reducer behavior,
+  mapping reproducibility, unit/mapping provenance, and invalid-input tests.
+
+Feature values retain their declared units. Mapping coefficients therefore
+carry the inverse or otherwise appropriate units needed to produce the
+intended coordinate scale; the bridge does not perform dimensional analysis
+or claim a physically privileged feature-to-V8 mapping. Establishing and
+validating domain-specific mappings remains a separate research task.
