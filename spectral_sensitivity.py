@@ -228,7 +228,9 @@ def run_spectral_sensitivity(
                 raise ValueError(
                     f"covariance diagonal for {name!r} conflicts with feature uncertainty"
                 )
-    elif any(item.standard_uncertainty is not None for item in features.values()):
+    elif monte_carlo_samples and any(
+        item.standard_uncertainty is not None for item in features.values()
+    ):
         if not assume_independent_features:
             raise ValueError(
                 "Monte Carlo requires covariance or explicit independent-feature assumption"
