@@ -29,3 +29,19 @@ def test_cauchy_initial_data_and_trajectory_validation():
         phases=x.phases,angular_frequencies=x.angular_frequencies,
         v8_velocity=(1,)*8)
     with pytest.raises(ValueError): run_cauchy_janus_benchmark(bad,dt=1,steps=2,samples=100)
+
+
+def test_parameter_sweep_covers_all_axes_and_preserves_invariants():
+    from cauchy_janus import run_cauchy_janus_parameter_sweep
+    x=run_cauchy_janus_parameter_sweep(initial(),
+        fillings=(0.0,0.5,1.0),temperatures=(0.0,0.2),
+        phase_shifts=(0.0,1.0),pulse_intervals=(0.01,0.03),
+        velocity_scales=(-1.0,0.0,1.0),steps=2,samples=100,seed=19)
+    assert x["metadata"]["case_count"]==12
+    assert x["summary"]["all_gosset_boundary"]
+    assert x["summary"]["all_boundaries_positive"]
+    assert x["summary"]["all_fermi_bounds_valid"]
+    assert x["summary"]["maximum_particle_number_residual"]<1e-9
+    assert x["summary"]["maximum_particle_hole_capacity_residual"]<1e-9
+    assert x["summary"]["maximum_phase_reversal_residual"]<1e-9
+    assert x["summary"]["maximum_v8_reversal_residual"]<1e-12
