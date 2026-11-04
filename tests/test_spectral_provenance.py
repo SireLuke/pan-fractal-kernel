@@ -51,6 +51,8 @@ def test_janus_pair_carries_identical_observation_evidence():
     assert pair.dissolution.payload["observation_digest"] == observation.digest
     assert pair.formation.payload["janus_channel"] == "UHFE_formation"
     assert pair.dissolution.payload["janus_channel"] == "UDFE_dissolution"
+    with pytest.raises(TypeError):
+        pair.formation.payload["observation_json"] = "{}"
 
 
 def test_append_spectral_janus_is_append_only_and_changes_history_fingerprint():
