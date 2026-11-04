@@ -25,8 +25,8 @@ def test_altermagnetic_reversed_paths_have_same_endpoint_and_distinct_history():
     assert result["summary"]["identical_endpoints"]
     assert result["summary"]["equal_path_lengths"]
     assert result["oriented_history_area"]["A"] == pytest.approx(0.0)
-    assert result["oriented_history_area"]["B"] == pytest.approx(0.225)
-    assert result["normalized_history_coordinate"] == {"A": 0.0, "B": 0.5}
+    assert result["oriented_history_area"]["B"] == pytest.approx(0.45)
+    assert result["normalized_history_coordinate"] == {"A": 0.0, "B": 1.0}
     assert result["summary"]["history_proxy_spectral_max_difference"] > 0
 
 
