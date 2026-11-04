@@ -202,12 +202,16 @@ def extract_spectral_features(
                     index = min(range(len(samples)), key=samples.__getitem__) if spec.reducer == "min" else max(range(len(samples)), key=samples.__getitem__)
                     standard_uncertainty = sigmas[index]
                 elif spec.reducer == "rms":
+                    if value == 0:
+                        raise ValueError("RMS uncertainty is undefined at an all-zero feature vector")
                     standard_uncertainty = (
                         math.sqrt(math.fsum((samples[i] * sigmas[i]) ** 2 for i in range(len(samples))))
                         / (len(samples) * value)
-                        if value != 0 else math.sqrt(math.fsum(item * item for item in sigmas)) / len(sigmas)
                     )
-                uncertainty_assumption = "independent_samples_first_order"
+                uncertainty_assumption = (
+                    "selected_extremum_first_order" if spec.reducer in ("min", "max")
+                    else "independent_samples_first_order"
+                )
             if standard_uncertainty < 0:
                 raise ValueError("standard uncertainties must be non-negative")
             if not math.isfinite(standard_uncertainty):
