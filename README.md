@@ -145,3 +145,29 @@ about the physical distribution of measurements. Forward/reverse evaluation
 tests numerical accumulation-order sensitivity; it is not a physical
 time-reversal test. The bridge remains an explicit model projection, not a
 physical law.
+
+## PAN experimental comparison engine
+
+- `pan_experimental_comparison.py`: immutable, content-addressed comparison
+  reports for normalized V8 states, extracted spectral feature vectors,
+  UHFE/UDFE semantic projections, and already-aligned state trajectories.
+- V8 comparisons report signed coordinate deltas and L1, L2, L-infinity,
+  RMS, and explicitly weighted L2 distances.
+- Spectral comparisons require exact feature-name and unit-label agreement.
+  Combined standard uncertainties are computed only when independence of
+  the two observations is explicitly authorized; otherwise they remain
+  uncomputed rather than assuming zero correlation.
+- Janus comparisons keep UHFE and UDFE channel distances separate and report
+  changes in each paired head's formation-minus-inverse gap.
+- Path comparisons require equal-length, already-aligned trajectories. They
+  report per-step distances, maximum and cumulative step divergence, and
+  endpoint divergence. No interpolation or resampling is implicit.
+- `tests/test_pan_experimental_comparison.py`: metric contracts, uncertainty
+  policy, unit mismatch rejection, Janus pairing, aligned paths, provenance
+  digests, and invalid-input checks.
+
+These baseline distances are transparent diagnostics over normalized model
+coordinates, not universal physical metrics. The Gosset 4_21 / E8 comparison
+interface remains intentionally unimplemented pending a separately specified
+and validated geometric metric adapter. No Euclidean V8 distance is presented
+as an E8 invariant or as evidence of physical correspondence.
