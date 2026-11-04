@@ -73,6 +73,6 @@ The following are harness work items, not claims that they are already implement
 
 ## Interpretation boundary
 
-The Gosset 4_21 / E8 root polytope remains the primary geometric target. The 8D cross-polytope is a comparison adapter, not a substitute. The harness must test that switching geometry does not silently mutate V8 state or UHFE/UDFE semantic records.
+The Gosset 4_21 / E8 root polytope remains the primary geometric target. The 8D cross-polytope is a comparison adapter, not a substitute. The harness must enforce that JOBF always uses Gosset 4_21 as its production radial boundary. The H8 cross-polytope may be evaluated independently for comparison, but it cannot be injected as a JOBF boundary. Tests also verify that H8 comparison calculations do not mutate V8 state or UHFE/UDFE semantic records.
 
 Physics and geometry are complementary but not interchangeable: geometric structure, physical dynamics, numerical implementation, and empirical calibration require separate validation paths.

@@ -26,7 +26,7 @@ def canonical_state():
 
 def test_canonical_v8_state_survives_semantic_to_jobf_pipeline(canonical_state):
     frame = read_semantics(canonical_state)
-    model = JanusOctadialBreathingField(dt=0.01, geometry="gosset")
+    model = JanusOctadialBreathingField(dt=0.01)
     model.base = np.asarray([getattr(canonical_state, key)
                              for key in ("h", "R", "u", "d", "tau", "chi", "s", "f")])
     model.state_amp = np.zeros(8, dtype=float)
@@ -45,28 +45,29 @@ def test_canonical_v8_state_survives_semantic_to_jobf_pipeline(canonical_state):
     assert np.allclose(diagnostics["udfe_channels"], frame.udfe_channels)
 
 
-def test_geometry_swap_changes_boundary_not_semantic_record(canonical_state):
+def test_jobf_boundary_is_fixed_to_gosset_and_h8_is_comparison_only(canonical_state):
     frame = read_semantics(canonical_state)
-    gosset = JanusOctadialBreathingField(dt=0.01, geometry="gosset")
-    legacy = JanusOctadialBreathingField(dt=0.01, geometry="cross_polytope")
+    model = JanusOctadialBreathingField(dt=0.01)
     base = np.asarray([getattr(canonical_state, key)
                        for key in ("h", "R", "u", "d", "tau", "chi", "s", "f")])
-    for model in (gosset, legacy):
-        model.base = base.copy()
-        model.state_amp = np.zeros(8, dtype=float)
-        model.h_base = frame.uhfe_channels.copy()
-        model.d_base = frame.udfe_channels.copy()
+    model.base = base.copy()
+    model.state_amp = np.zeros(8, dtype=float)
+    model.h_base = frame.uhfe_channels.copy()
+    model.d_base = frame.udfe_channels.copy()
     directions = sphere_directions(64, seed=81)
 
-    g_radius, _, _, g_diag = gosset.boundary(directions, 0.4)
-    h_radius, _, _, h_diag = legacy.boundary(directions, 0.4)
+    gosset_radius, _, _, diagnostics = model.boundary(directions, 0.4)
+    h8_comparison_radius = CrossPolytopeAdapter().radial_boundary_many(directions)
 
-    assert g_diag["geometry"] == Gosset421Adapter.name
-    assert h_diag["geometry"] == CrossPolytopeAdapter.name
-    assert not np.allclose(g_radius, h_radius)
-    assert np.allclose(g_diag["uhfe_channels"], h_diag["uhfe_channels"])
-    assert np.allclose(g_diag["udfe_channels"], h_diag["udfe_channels"])
-    assert g_diag["state"] == h_diag["state"]
+    assert isinstance(model.geometry, Gosset421Adapter)
+    assert diagnostics["geometry"] == Gosset421Adapter.name
+    assert not np.allclose(gosset_radius, h8_comparison_radius)
+    assert np.allclose(diagnostics["uhfe_channels"], frame.uhfe_channels)
+    assert np.allclose(diagnostics["udfe_channels"], frame.udfe_channels)
+    assert diagnostics["state"] == frame.state
+
+    with pytest.raises(TypeError):
+        JanusOctadialBreathingField(dt=0.01, geometry="cross_polytope")
 
 
 def test_gosset_projection_ladder_preserves_canonical_root_identity():

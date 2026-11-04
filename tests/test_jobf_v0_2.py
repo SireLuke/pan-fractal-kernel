@@ -164,14 +164,18 @@ def test_legacy_cross_polytope_adapter_is_explicit_and_unchanged():
     assert adapter.radial_boundary_many(dirs) == pytest.approx(1.0 / np.abs(dirs).sum(axis=1))
 
 
-def test_jobf_defaults_to_gosset_and_allows_explicit_legacy_geometry():
+def test_jobf_is_locked_to_gosset_as_its_production_boundary():
     model = JanusOctadialBreathingField()
+    assert isinstance(model.geometry, Gosset421Adapter)
     assert model.geometry.name == "gosset_4_21_e8_root_polytope"
-    legacy = JanusOctadialBreathingField(geometry="cross_polytope")
-    assert legacy.geometry.name == "cross_polytope_h8"
     dirs = sphere_directions(16, seed=11)
     _, _, _, diag = model.boundary(dirs, .2)
     assert diag["geometry"] == "gosset_4_21_e8_root_polytope"
+
+    # H8 remains a standalone comparison adapter, not a JOBF boundary option.
+    assert CrossPolytopeAdapter().name == "cross_polytope_h8"
+    with pytest.raises(TypeError):
+        JanusOctadialBreathingField(geometry="cross_polytope")
 
 
 
@@ -196,19 +200,19 @@ def test_geometry_adapters_reject_zero_and_nonfinite_directions():
 
 
 def test_jobf_caches_base_geometry_for_repeated_direction_samples():
-    class CountingGeometry:
-        name = "counting_test_geometry"
-        def __init__(self):
-            self.calls = 0
-        def radial_boundary_many(self, directions):
-            self.calls += 1
-            return np.ones(len(directions), dtype=float)
+    model = JanusOctadialBreathingField()
+    calls = 0
+    original = model.geometry.radial_boundary_many
 
-    geometry = CountingGeometry()
-    model = JanusOctadialBreathingField(geometry=geometry)
+    def counted(directions):
+        nonlocal calls
+        calls += 1
+        return original(directions)
+
+    model.geometry.radial_boundary_many = counted
     dirs = sphere_directions(32, seed=5)
     model.boundary(dirs, 0.0)
     model.boundary(dirs, 0.1)
-    assert geometry.calls == 1
+    assert calls == 1
     model.boundary(dirs.copy(), 0.2)
-    assert geometry.calls == 1
+    assert calls == 1
