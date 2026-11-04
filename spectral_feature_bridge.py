@@ -80,6 +80,56 @@ class V8Projection:
     observation_digest: str
     feature_vector_digest: str
     mapping_json: str
+    coordinate_uncertainties_json: str = "{}"
+    coordinate_covariance_json: str = "{}"
+
+
+def _validate_covariance(
+    names: Sequence[str], covariance: Mapping[str, Mapping[str, float]]
+) -> list[list[float]]:
+    """Validate a complete symmetric positive-semidefinite covariance matrix."""
+    expected = set(names)
+    if set(covariance) != expected:
+        raise ValueError("covariance rows must cover exactly the feature names")
+    matrix: list[list[float]] = []
+    for row_name in names:
+        row = covariance[row_name]
+        if not isinstance(row, Mapping) or set(row) != expected:
+            raise ValueError("each covariance row must cover exactly the feature names")
+        matrix.append([_finite_number(row[col], f"covariance[{row_name},{col}]") for col in names])
+    n = len(names)
+    scale = max(1.0, max(abs(value) for row in matrix for value in row))
+    tol = 1e-10 * scale
+    for i in range(n):
+        for j in range(n):
+            if abs(matrix[i][j] - matrix[j][i]) > tol:
+                raise ValueError("feature covariance matrix must be symmetric")
+    # Jacobi eigenvalue iteration for a small dense matrix; reject negative
+    # eigenvalues beyond floating-point tolerance (PSD permits zero modes).
+    a = [row[:] for row in matrix]
+    for _ in range(max(1, 50 * n * n)):
+        p, q, largest = 0, 0, 0.0
+        for i in range(n):
+            for j in range(i + 1, n):
+                if abs(a[i][j]) > largest:
+                    p, q, largest = i, j, abs(a[i][j])
+        if largest <= tol:
+            break
+        angle = 0.5 * math.atan2(2.0 * a[p][q], a[q][q] - a[p][p])
+        cosine, sine = math.cos(angle), math.sin(angle)
+        app, aqq, apq = a[p][p], a[q][q], a[p][q]
+        a[p][p] = cosine*cosine*app - 2*sine*cosine*apq + sine*sine*aqq
+        a[q][q] = sine*sine*app + 2*sine*cosine*apq + cosine*cosine*aqq
+        a[p][q] = a[q][p] = 0.0
+        for k in range(n):
+            if k in (p, q):
+                continue
+            akp, akq = a[k][p], a[k][q]
+            a[k][p] = a[p][k] = cosine*akp - sine*akq
+            a[k][q] = a[q][k] = sine*akp + cosine*akq
+    if any(a[i][i] < -tol for i in range(n)):
+        raise ValueError("feature covariance matrix must be positive semidefinite")
+    return matrix
 
 
 def _reduce(value: object, reducer: str, key: str) -> float:
@@ -186,6 +236,8 @@ def project_features_to_v8(
     *,
     mapping: Mapping[str, Mapping[str, float]],
     offsets: Mapping[str, float] | None = None,
+    feature_covariance: Mapping[str, Mapping[str, float]] | None = None,
+    assume_independent_features: bool = False,
 ) -> V8Projection:
     """Apply a fully explicit linear feature-to-V8 map.
 
@@ -218,12 +270,56 @@ def project_features_to_v8(
         values[coordinate] = total
         canonical_mapping[coordinate] = dict(sorted(coefficients.items()))
     state = V8State(**values)
+    feature_names = tuple(features)
+    covariance_matrix = None
+    if feature_covariance is not None:
+        covariance_matrix = _validate_covariance(feature_names, feature_covariance)
+        for index, name in enumerate(feature_names):
+            sigma = features[name].standard_uncertainty
+            if sigma is not None and not math.isclose(
+                covariance_matrix[index][index], sigma * sigma, rel_tol=1e-7, abs_tol=1e-12
+            ):
+                raise ValueError(f"covariance diagonal for {name!r} conflicts with declared standard uncertainty")
+    elif any(item.standard_uncertainty is not None for item in features.values()):
+        if not assume_independent_features:
+            raise ValueError(
+                "feature uncertainties supplied without covariance; provide feature_covariance "
+                "or explicitly set assume_independent_features=True"
+            )
+        covariance_matrix = [
+            [(features[name].standard_uncertainty or 0.0) ** 2 if i == j else 0.0
+             for j, name in enumerate(feature_names)]
+            for i, name in enumerate(feature_names)
+        ]
+    coordinate_covariance: dict[str, dict[str, float]] = {}
+    coordinate_uncertainties: dict[str, float] = {}
+    if covariance_matrix is not None:
+        for left in V8_COORDINATES:
+            coordinate_covariance[left] = {}
+            for right in V8_COORDINATES:
+                total_cov = math.fsum(
+                    canonical_mapping[left].get(name, 0.0)
+                    * covariance_matrix[i][j]
+                    * canonical_mapping[right].get(other, 0.0)
+                    for i, name in enumerate(feature_names)
+                    for j, other in enumerate(feature_names)
+                )
+                coordinate_covariance[left][right] = total_cov
+            variance = coordinate_covariance[left][left]
+            if variance < -1e-10:
+                raise ValueError(f"negative propagated variance for {left}")
+            coordinate_uncertainties[left] = math.sqrt(max(0.0, variance))
     mapping_record = {
         "schema": "pan-spectral-feature-to-v8-map-v1",
         "mapping": canonical_mapping,
         "offsets": {key: _finite_number(value, f"{key} offset")
                     for key, value in sorted(offset_values.items())},
         "feature_units": {key: value.unit for key, value in sorted(features.items())},
+        "uncertainty_method": (
+            "provided_covariance" if feature_covariance is not None
+            else "independent_features_assumed" if covariance_matrix is not None
+            else "not_propagated"
+        ),
     }
     mapping_json = json.dumps(mapping_record, sort_keys=True, separators=(",", ":"), allow_nan=False)
     vector_digest = hashlib.sha256(vector.features_json.encode("utf-8")).hexdigest()
@@ -233,4 +329,10 @@ def project_features_to_v8(
         observation_digest=vector.observation_digest,
         feature_vector_digest=vector_digest,
         mapping_json=mapping_json,
+        coordinate_uncertainties_json=json.dumps(
+            coordinate_uncertainties, sort_keys=True, separators=(",", ":"), allow_nan=False
+        ),
+        coordinate_covariance_json=json.dumps(
+            coordinate_covariance, sort_keys=True, separators=(",", ":"), allow_nan=False
+        ),
     )
