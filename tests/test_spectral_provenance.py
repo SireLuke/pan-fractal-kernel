@@ -46,7 +46,7 @@ def test_janus_pair_carries_identical_observation_evidence():
     pair = observation.to_janus_pair("evt-1")
     assert pair.formation.event_id == "evt-1:uhfe"
     assert pair.dissolution.event_id == "evt-1:udfe"
-    assert pair.formation.payload["observation"] == pair.dissolution.payload["observation"]
+    assert pair.formation.payload["observation_json"] == pair.dissolution.payload["observation_json"]
     assert pair.formation.payload["observation_digest"] == observation.digest
     assert pair.dissolution.payload["observation_digest"] == observation.digest
     assert pair.formation.payload["janus_channel"] == "UHFE_formation"
