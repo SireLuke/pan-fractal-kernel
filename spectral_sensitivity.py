@@ -189,10 +189,19 @@ def run_spectral_sensitivity(
     )
     baseline = base_projection.state.as_mapping()
     one_factor: list[OneFactorResult] = []
-    for name, feature in features.items():
-        scale = scales.get(name, feature.standard_uncertainty)
-        if scale is None:
-            continue
+    # An explicit scale map is also an explicit feature selection. Without
+    # one, sweep every feature that carries a standard uncertainty.
+    selected_features = (
+        scales.items()
+        if perturbation_scales is not None
+        else (
+            (name, feature.standard_uncertainty)
+            for name, feature in features.items()
+            if feature.standard_uncertainty is not None
+        )
+    )
+    for name, selected_scale in selected_features:
+        scale = selected_scale
         scale = _finite_number(scale, f"{name} perturbation scale")
         if scale <= 0:
             raise ValueError(f"perturbation scale for {name!r} must be positive")
