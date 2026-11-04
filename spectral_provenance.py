@@ -11,6 +11,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from hashlib import sha256
 import json
+from types import MappingProxyType
 from typing import Mapping
 
 from transition_algebra import History, JanusPair, Transition
@@ -167,8 +168,8 @@ class SpectralObservation:
         dissolution_payload = dict(base_payload, janus_channel="UDFE_dissolution")
         prefix = event_id_prefix.strip()
         return JanusPair(
-            formation=Transition(prefix + ":uhfe", "spectral_observation", formation_payload),
-            dissolution=Transition(prefix + ":udfe", "spectral_observation", dissolution_payload),
+            formation=Transition(prefix + ":uhfe", "spectral_observation", MappingProxyType(formation_payload)),
+            dissolution=Transition(prefix + ":udfe", "spectral_observation", MappingProxyType(dissolution_payload)),
         )
 
 
