@@ -39,7 +39,7 @@ class FeatureSpec:
     reducer: str = "scalar"
     uncertainty_key: str | None = None
 
-    def __post_init__(self) -> None
+    def __post_init__(self) -> None:
         if not self.name.strip() or not self.key.strip() or not self.unit.strip():
             raise ValueError("feature name, key, and unit must be non-empty")
         if self.source not in ("raw", "derived"):
