@@ -104,3 +104,24 @@ carry the inverse or otherwise appropriate units needed to produce the
 intended coordinate scale; the bridge does not perform dimensional analysis
 or claim a physically privileged feature-to-V8 mapping. Establishing and
 validating domain-specific mappings remains a separate research task.
+
+## Spectral uncertainty propagation
+
+The spectral feature bridge can carry explicitly declared standard
+uncertainties from raw observations into extracted features. Sequence reducers
+use first-order propagation under an independent-sample assumption; extrema
+use the selected sample's uncertainty as a local approximation, and RMS
+uncertainty is rejected at the all-zero nondifferentiable point.
+
+Linear V8 projection propagates feature covariance as
+`C_V8 = W C_feature W^T`. A supplied covariance matrix must be complete,
+symmetric, and positive semidefinite. Its diagonal is checked against any
+feature-level standard uncertainties supplied during extraction. If only
+individual standard uncertainties are available, the caller must explicitly
+opt into an independent-feature assumption; the bridge never silently assumes
+zero correlation. The resulting coordinate standard uncertainties and full
+coordinate covariance are retained alongside the mapping provenance.
+
+These are first-order uncertainty estimates for a declared linear map, not
+automatic confidence intervals or a claim that the chosen V8 mapping is
+physically privileged.
