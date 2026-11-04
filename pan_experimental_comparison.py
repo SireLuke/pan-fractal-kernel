@@ -14,7 +14,9 @@ import math
 from typing import Mapping, Sequence
 
 from hydra_semantic_reader import read_semantics
-from janus_hydra import PAIR_KEYS, V8_KEYS
+from janus_hydra import V8_KEYS
+
+PAIR_KEYS = ("bubble", "honeycomb", "spiderweb", "chiraldna", "compoundeye")
 from spectral_feature_bridge import SpectralFeatureVector
 from transition_algebra import V8State
 
