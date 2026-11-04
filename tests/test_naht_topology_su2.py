@@ -81,3 +81,18 @@ def test_su2_matrix_is_unitary_and_determinant_one():
 def test_su2_requires_unit_quaternion():
     with pytest.raises(ValueError):
         SU2(2, 0, 0, 0)
+
+
+
+def test_su2_matrix_representation_respects_ordered_composition():
+    x = SU2.from_axis_angle((1, 0, 0), 0.8).to_matrix()
+    z = SU2.from_axis_angle((0, 0, 1), 1.1).to_matrix()
+    composed = (SU2.from_axis_angle((1, 0, 0), 0.8)
+                @ SU2.from_axis_angle((0, 0, 1), 1.1)).to_matrix()
+    product = tuple(
+        tuple(sum(x[i][k] * z[k][j] for k in range(2)) for j in range(2))
+        for i in range(2)
+    )
+    for i in range(2):
+        for j in range(2):
+            assert composed[i][j] == pytest.approx(product[i][j])
