@@ -1,4 +1,4 @@
-""""SU(2) path transport represented by unit quaternions.
+"""SU(2) path transport represented by unit quaternions.
 
 A unit quaternion is an element of SU(2) in its fundamental doublet
 representation. Quaternion multiplication composes ordered path segments.
@@ -83,4 +83,3 @@ class SU2:
             (complex(self.w, -self.z), complex(-self.y, -self.x)),
             (complex(self.y, -self.x), complex(self.w, self.z)),
         )
-"
