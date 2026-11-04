@@ -59,3 +59,26 @@ Instrument metadata, calibration, uncertainty, and raw measured spectra
 belong in a later provenance/ingestion adapter. The harmonic oscillator,
 Rydberg, and Moseley relations are model/reference equations with stated
 domains and approximations, not universal high-precision line solvers.
+
+## Spectral provenance and Janus history
+
+- `spectral_provenance.py`: immutable, schema-versioned spectral observation
+  records with raw measurements, explicit unit labels, derived values,
+  uncertainty, instrument metadata, calibration, acquisition timestamp, and
+  source provenance.
+- `SpectralObservation.digest`: deterministic SHA-256 content fingerprint of
+  the complete canonical observation. The digest is an index, not a
+  replacement for the retained record.
+- `SpectralObservation.to_janus_pair()` and
+  `append_spectral_janus()`: append paired UHFE/UDFE history events that
+  reference the same canonical observation bytes and digest. The channel
+  labels distinguish processing paths; they do not alter or negate measured
+  data.
+- `tests/test_spectral_provenance.py`: raw-data retention, stable content
+  identity, paired evidence equality, append-only history, duplicate-event
+  rejection, and invalid-record coverage.
+
+Spectral ingestion is deliberately separate from V8 projection. No spectral
+quantity is silently assigned to a V8 coordinate. A later, separately
+validated adapter may compute explicit features or model projections while
+retaining the raw observation and its provenance unchanged.
