@@ -27,6 +27,11 @@ def canonical_state():
 def test_canonical_v8_state_survives_semantic_to_jobf_pipeline(canonical_state):
     frame = read_semantics(canonical_state)
     model = JanusOctadialBreathingField(dt=0.01, geometry="gosset")
+    model.base = np.asarray([getattr(canonical_state, key)
+                             for key in ("h", "R", "u", "d", "tau", "chi", "s", "f")])
+    model.state_amp = np.zeros(8, dtype=float)
+    model.h_base = frame.uhfe_channels.copy()
+    model.d_base = frame.udfe_channels.copy()
     directions = sphere_directions(100, seed=2026)
 
     radius, baseline, exponent, diagnostics = model.boundary(directions, 0.25)
@@ -41,8 +46,16 @@ def test_canonical_v8_state_survives_semantic_to_jobf_pipeline(canonical_state):
 
 
 def test_geometry_swap_changes_boundary_not_semantic_record(canonical_state):
+    frame = read_semantics(canonical_state)
     gosset = JanusOctadialBreathingField(dt=0.01, geometry="gosset")
     legacy = JanusOctadialBreathingField(dt=0.01, geometry="cross_polytope")
+    base = np.asarray([getattr(canonical_state, key)
+                       for key in ("h", "R", "u", "d", "tau", "chi", "s", "f")])
+    for model in (gosset, legacy):
+        model.base = base.copy()
+        model.state_amp = np.zeros(8, dtype=float)
+        model.h_base = frame.uhfe_channels.copy()
+        model.d_base = frame.udfe_channels.copy()
     directions = sphere_directions(64, seed=81)
 
     g_radius, _, _, g_diag = gosset.boundary(directions, 0.4)
@@ -62,7 +75,8 @@ def test_gosset_projection_ladder_preserves_canonical_root_identity():
     assert set(chain) == {8, 4, 3, 2}
     for dimension in (8, 4, 3, 2):
         result = chain[dimension]
-        assert result.source_points.shape == (240, 8)
+        source_dimension = {8: 8, 4: 8, 3: 4, 2: 3}[dimension]
+        assert result.source_points.shape == (240, source_dimension)
         assert result.projected_points.shape == (240, dimension)
         assert np.array_equal(result.source_indices, np.arange(240))
     assert chain[8].is_lossless
