@@ -41,3 +41,21 @@ software integration benchmark, not a stellar-evolution solver. The
 altermagnetic path-order benchmark uses an explicitly phenomenological
 history-coupling knob; its endpoint-only null model must erase path-order
 differences. Neither benchmark establishes a new physical interaction.
+
+## Spectroscopy reference layer
+
+- `spectroscopy.py`: unit-explicit foundational calculations for photon
+  energy/frequency/wavelength, spectroscopic wavenumber, Beer-Lambert
+  absorbance/transmittance, diatomic reduced mass and harmonic vibrational
+  wavenumber, NMR Larmor frequency and chemical shift, hydrogen-like Rydberg
+  transitions, and transition-specific Moseley scaling.
+- `tests/test_spectroscopy.py`: dimensional/conversion consistency,
+  Beer-Lambert round trips, reduced-mass and vibrational checks, proton NMR,
+  Balmer-alpha reference, Moseley scaling, and invalid-input coverage.
+
+This layer computes reference observables; it does not force measurements
+into V8 coordinates or claim that the Gosset 4_21 geometry predicts spectra.
+Instrument metadata, calibration, uncertainty, and raw measured spectra
+belong in a later provenance/ingestion adapter. The harmonic oscillator,
+Rydberg, and Moseley relations are model/reference equations with stated
+domains and approximations, not universal high-precision line solvers.
