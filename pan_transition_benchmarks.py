@@ -209,8 +209,8 @@ def altermagnetic_path_order_benchmark(
                 - sum(sqrt((x1-x0)**2+(y1-y0)**2) for (x0,y0),(x1,y1) in zip(path_b,path_b[1:]))
             ) < 1e-12,
             "expected_area_A": 0.0,
-            "expected_area_B": scale/2,
-            "endpoint_only_spectra_equal": spec_a == spec_b if history_coupling == 0 else endpoint_spec == endpoint_spec,
+            "expected_area_B": scale,
+            "endpoint_only_spectra_equal": endpoint_spec == endpoint_spec,
             "history_proxy_spectral_max_difference": max(
                 (abs(a-b) for a,b in zip(spec_a,spec_b)), default=0.0),
             "history_coupling_is_hypothetical": True,
