@@ -125,3 +125,23 @@ coordinate covariance are retained alongside the mapping provenance.
 These are first-order uncertainty estimates for a declared linear map, not
 automatic confidence intervals or a claim that the chosen V8 mapping is
 physically privileged.
+
+## Spectral sensitivity harness
+
+- `spectral_sensitivity.py`: one-factor-at-a-time finite-difference sweeps,
+  seeded Gaussian Monte Carlo using a supplied feature covariance or an
+  explicitly authorized independent-feature approximation, and forward /
+  reverse floating-point accumulation-order checks.
+- Reports retain observation, feature-vector, and mapping digests; baseline
+  V8 state; perturbation scales; Monte Carlo seed; coordinate means, standard
+  deviations, and empirical quantiles; and declared assumptions.
+- `tests/test_spectral_sensitivity.py`: analytic linear-map derivatives,
+  seeded reproducibility, covariance handling, provenance, and invalid-input
+  checks.
+
+The Monte Carlo summaries are empirical summaries of a caller-specified
+Gaussian uncertainty model, not automatic confidence intervals or claims
+about the physical distribution of measurements. Forward/reverse evaluation
+tests numerical accumulation-order sensitivity; it is not a physical
+time-reversal test. The bridge remains an explicit model projection, not a
+physical law.
