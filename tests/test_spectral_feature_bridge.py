@@ -116,3 +116,92 @@ def test_raw_feature_unit_must_match_observation_unit():
     bad = [FeatureSpec("wavelength", "raw", "wavelength", "cm")]
     with pytest.raises(ValueError, match="does not match"):
         extract_spectral_features(observation(), bad)
+
+def test_mean_uncertainty_propagates_for_independent_samples():
+    obs = SpectralObservation.create(
+        observation_id="unc-mean",
+        modality="IR",
+        raw_measurements={"signal": [1.0, 2.0, 3.0]},
+        units={"signal": "AU"},
+        uncertainty={"signal_sigma": [0.1, 0.2, 0.3]},
+    )
+    vector = extract_spectral_features(
+        obs, [FeatureSpec("mean_signal", "raw", "signal", "AU", "mean", "signal_sigma")]
+    )
+    feature = vector.features["mean_signal"]
+    assert feature.value == pytest.approx(2.0)
+    assert feature.standard_uncertainty == pytest.approx((0.1**2 + 0.2**2 + 0.3**2) ** 0.5 / 3)
+    assert feature.uncertainty_assumption == "independent_samples_first_order"
+
+
+def test_covariance_propagates_through_linear_v8_mapping():
+    obs = SpectralObservation.create(
+        observation_id="unc-cov",
+        modality="NMR",
+        raw_measurements={"a": 10.0, "b": 20.0},
+        units={"a": "Hz", "b": "ppm"},
+        uncertainty={"sigma_a": 2.0, "sigma_b": 3.0},
+    )
+    vector = extract_spectral_features(
+        obs,
+        [
+            FeatureSpec("a", "raw", "a", "Hz", uncertainty_key="sigma_a"),
+            FeatureSpec("b", "raw", "b", "ppm", uncertainty_key="sigma_b"),
+        ],
+    )
+    mapping = {coordinate: {"a": 0.0, "b": 0.0} for coordinate in V8_COORDINATES}
+    mapping["h"] = {"a": 2.0, "b": 1.0}
+    mapping["u"] = {"a": 1.0, "b": -1.0}
+    covariance = {"a": {"a": 4.0, "b": 1.0}, "b": {"a": 1.0, "b": 9.0}}
+    with pytest.raises(ValueError, match="without covariance"):
+        project_features_to_v8(vector, mapping=mapping)
+    result = project_features_to_v8(vector, mapping=mapping, feature_covariance=covariance)
+    import json
+    sigmas = json.loads(result.coordinate_uncertainties_json)
+    cov = json.loads(result.coordinate_covariance_json)
+    assert sigmas["h"] == pytest.approx(27.0 ** 0.5)
+    assert sigmas["u"] == pytest.approx(11.0 ** 0.5)
+    assert cov["h"]["u"] == pytest.approx(-3.0)
+    assert json.loads(result.mapping_json)["uncertainty_method"] == "provided_covariance"
+
+
+def test_independent_feature_assumption_must_be_explicit():
+    obs = SpectralObservation.create(
+        observation_id="unc-independent",
+        modality="UV-Vis",
+        raw_measurements={"x": 5.0},
+        units={"x": "AU"},
+        uncertainty={"x_sigma": 0.25},
+    )
+    vector = extract_spectral_features(
+        obs, [FeatureSpec("x", "raw", "x", "AU", uncertainty_key="x_sigma")]
+    )
+    mapping = {coordinate: {"x": 0.0} for coordinate in V8_COORDINATES}
+    mapping["h"] = {"x": 4.0}
+    result = project_features_to_v8(vector, mapping=mapping, assume_independent_features=True)
+    import json
+    assert json.loads(result.coordinate_uncertainties_json)["h"] == pytest.approx(1.0)
+    assert json.loads(result.mapping_json)["uncertainty_method"] == "independent_features_assumed"
+
+
+@pytest.mark.parametrize(
+    "covariance",
+    [
+        {"a": {"a": 1.0, "b": 2.0}, "b": {"a": 0.0, "b": 1.0}},
+        {"a": {"a": 1.0, "b": 2.0}, "b": {"a": 2.0, "b": 1.0}},
+    ],
+)
+def test_invalid_feature_covariance_is_rejected(covariance):
+    obs = SpectralObservation.create(
+        observation_id="unc-invalid",
+        modality="UV-Vis",
+        raw_measurements={"a": 1.0, "b": 2.0},
+        units={"a": "AU", "b": "AU"},
+    )
+    vector = extract_spectral_features(
+        obs,
+        [FeatureSpec("a", "raw", "a", "AU"), FeatureSpec("b", "raw", "b", "AU")],
+    )
+    mapping = {coordinate: {"a": 1.0, "b": 1.0} for coordinate in V8_COORDINATES}
+    with pytest.raises(ValueError):
+        project_features_to_v8(vector, mapping=mapping, feature_covariance=covariance)
