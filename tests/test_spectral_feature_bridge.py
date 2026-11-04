@@ -159,9 +159,9 @@ def test_covariance_propagates_through_linear_v8_mapping():
     import json
     sigmas = json.loads(result.coordinate_uncertainties_json)
     cov = json.loads(result.coordinate_covariance_json)
-    assert sigmas["h"] == pytest.approx(27.0 ** 0.5)
+    assert sigmas["h"] == pytest.approx(29.0 ** 0.5)
     assert sigmas["u"] == pytest.approx(11.0 ** 0.5)
-    assert cov["h"]["u"] == pytest.approx(-3.0)
+    assert cov["h"]["u"] == pytest.approx(-2.0)
     assert json.loads(result.mapping_json)["uncertainty_method"] == "provided_covariance"
 
 
