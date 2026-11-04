@@ -1,4 +1,4 @@
-"""SU(2) path transport represented by unit quaternions.
+""""SU(2) path transport represented by unit quaternions.
 
 A unit quaternion is an element of SU(2) in its fundamental doublet
 representation. Quaternion multiplication composes ordered path segments.
@@ -74,8 +74,13 @@ class SU2:
 
     def to_matrix(self) -> tuple[tuple[complex, complex],
                                  tuple[complex, complex]]:
-        """Return the equivalent 2x2 special-unitary matrix."""
+        """Return the homomorphic fundamental representation.
+
+        The convention M(q) = w I - i (x sigma_x + y sigma_y + z sigma_z)
+        ensures M(q1 * q2) == M(q1) @ M(q2), matching __matmul__.
+        """
         return (
-            (complex(self.w, self.z), complex(self.y, self.x)),
-            (complex(-self.y, self.x), complex(self.w, -self.z)),
+            (complex(self.w, -self.z), complex(-self.y, -self.x)),
+            (complex(self.y, -self.x), complex(self.w, self.z)),
         )
+"
