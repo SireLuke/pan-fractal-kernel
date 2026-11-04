@@ -314,7 +314,6 @@ def historical_sandbox_reference_profile() -> SandboxMetricSet:
             role="context",
             provenance_note="Configured filling fraction; conservation residual was below 1e-15. The target value itself is not a quality score.",
         ),
-    )
         SandboxMetric(
             "schrodinger_l2_norm_drift", 1.11e-15, "absolute_drift", "lower_is_better",
             "schrodinger_norm_200_steps_v1", "software_numerical",
@@ -366,11 +365,12 @@ def historical_sandbox_reference_profile() -> SandboxMetricSet:
             provenance_note="Algebraic identity check phi^2=phi+1; exact arithmetic/property check, not empirical evidence.",
         ),
         SandboxMetric(
-            "quadrant_classification_means", 0.0, "placeholder", "context_only",
+            "quadrant_classification_sample_count", 2000.0, "cases", "context_only",
             "v8_randomized_quadrant_2000_seeded_v1", "synthetic_exploratory",
             role="context",
             provenance_note="Historical formation/dissolution quadrant counts and means; means are classification-circular and intentionally not scored.",
         ),
+    )
     return SandboxMetricSet(
         experiment_id="pan_sandbox_historical_reference",
         metrics=metrics,
