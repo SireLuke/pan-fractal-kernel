@@ -31,3 +31,13 @@ geometry is used as a comparative network benchmark, not as evidence that
 PAN models QCD.
 
 Run tests with `python -m pytest -q tests`.
+
+- `transition_algebra.py`: typed PAN transition operators, append-only event history, versioned UBP fingerprint, and conditional identity/no-reset checks.
+- `pan_transition_benchmarks.py`: quasi-star lifecycle integration fixture and reversed-path altermagnetic history-sensitivity proxy.
+- `tests/test_transition_algebra.py` and `tests/test_pan_transition_benchmarks.py`: operator-contract, lifecycle, history, and endpoint-null-model tests.
+
+The quasi-star lifecycle uses synthetic normalized V8 coordinates and is a
+software integration benchmark, not a stellar-evolution solver. The
+altermagnetic path-order benchmark uses an explicitly phenomenological
+history-coupling knob; its endpoint-only null model must erase path-order
+differences. Neither benchmark establishes a new physical interaction.
