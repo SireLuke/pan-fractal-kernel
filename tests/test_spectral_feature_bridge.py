@@ -87,7 +87,7 @@ def test_projection_records_mapping_and_units():
     ],
 )
 def test_invalid_feature_specs_and_sources_are_rejected(bad_specs):
-    with pytest.raises((ValueError, KeyError)):
+    with pytest.raises((TypeError, ValueError, KeyError)):
         extract_spectral_features(observation(), bad_specs)
 
 
@@ -110,3 +110,9 @@ def test_projection_rejects_nonfinite_coefficients_and_offsets():
     mapping["chi"] = {"temperature": 1.0}
     with pytest.raises(ValueError):
         project_features_to_v8(vector, mapping=mapping, offsets={"h": float("inf")})
+
+
+def test_raw_feature_unit_must_match_observation_unit():
+    bad = [FeatureSpec("wavelength", "raw", "wavelength", "cm")]
+    with pytest.raises(ValueError, match="does not match"):
+        extract_spectral_features(observation(), bad)
