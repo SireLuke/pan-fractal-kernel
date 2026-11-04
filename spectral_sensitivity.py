@@ -175,7 +175,18 @@ def run_spectral_sensitivity(
         if _finite_number(scale, f"{name} perturbation scale") <= 0:
             raise ValueError("perturbation scales must be positive")
 
-    base_projection = project_features_to_v8(vector, mapping=mapping, offsets=offsets)
+    # The projection API also computes covariance diagnostics. For OAT and
+    # baseline-state evaluation, an independent diagonal is only an internal
+    # placeholder; it is not used as a joint sampling model. Monte Carlo's
+    # independence policy is checked separately below and remains opt-in.
+    projection_uncertainty_kwargs = (
+        {"feature_covariance": feature_covariance}
+        if feature_covariance is not None
+        else {"assume_independent_features": True}
+    )
+    base_projection = project_features_to_v8(
+        vector, mapping=mapping, offsets=offsets, **projection_uncertainty_kwargs
+    )
     baseline = base_projection.state.as_mapping()
     one_factor: list[OneFactorResult] = []
     for name, feature in features.items():
@@ -188,10 +199,10 @@ def run_spectral_sensitivity(
         plus = _perturbed_vector(vector, {name: scale})
         minus = _perturbed_vector(vector, {name: -scale})
         plus_state = project_features_to_v8(
-            plus, mapping=mapping, offsets=offsets
+            plus, mapping=mapping, offsets=offsets, **projection_uncertainty_kwargs
         ).state.as_mapping()
         minus_state = project_features_to_v8(
-            minus, mapping=mapping, offsets=offsets
+            minus, mapping=mapping, offsets=offsets, **projection_uncertainty_kwargs
         ).state.as_mapping()
         derivatives = {
             coord: (plus_state[coord] - minus_state[coord]) / (2.0 * scale)
@@ -247,7 +258,7 @@ def run_spectral_sensitivity(
             }
             sample_vector = _perturbed_vector(vector, perturbations)
             state = project_features_to_v8(
-                sample_vector, mapping=mapping, offsets=offsets
+                sample_vector, mapping=mapping, offsets=offsets, **projection_uncertainty_kwargs
             ).state.as_mapping()
             for coordinate in V8_COORDINATES:
                 samples_by_coordinate[coordinate].append(state[coordinate])
