@@ -37,8 +37,9 @@ class FeatureSpec:
     key: str
     unit: str
     reducer: str = "scalar"
+    uncertainty_key: str | None = None
 
-    def __post_init__(self) -> None:
+    def __post_init__(self) -> None
         if not self.name.strip() or not self.key.strip() or not self.unit.strip():
             raise ValueError("feature name, key, and unit must be non-empty")
         if self.source not in ("raw", "derived"):
@@ -54,6 +55,9 @@ class SpectralFeature:
     source: str
     source_key: str
     reducer: str
+    standard_uncertainty: float | None = None
+    uncertainty_source_key: str | None = None
+    uncertainty_assumption: str | None = None
 
 
 @dataclass(frozen=True)
@@ -122,13 +126,51 @@ def extract_spectral_features(
                     f"feature {spec.name!r} unit {spec.unit!r} does not match "
                     f"raw observation unit {declared_unit!r}"
                 )
-        value = _reduce(source_values[spec.key], spec.reducer, spec.key)
+        source_value = source_values[spec.key]
+        value = _reduce(source_value, spec.reducer, spec.key)
+        standard_uncertainty = None
+        uncertainty_assumption = None
+        if spec.uncertainty_key is not None:
+            uncertainty_data = observation.uncertainty
+            if spec.uncertainty_key not in uncertainty_data:
+                raise KeyError(f"uncertainty record has no key {spec.uncertainty_key!r}")
+            sigma_value = uncertainty_data[spec.uncertainty_key]
+            if spec.reducer == "scalar":
+                standard_uncertainty = _finite_number(sigma_value, spec.uncertainty_key)
+            else:
+                if not isinstance(source_value, (list, tuple)) or not isinstance(sigma_value, (list, tuple)):
+                    raise ValueError("sequence reducers require sequence measurements and sequence uncertainties")
+                if len(source_value) != len(sigma_value) or not source_value:
+                    raise ValueError("measurement and uncertainty sequences must have equal non-zero length")
+                samples = [_finite_number(item, spec.key) for item in source_value]
+                sigmas = [_finite_number(item, spec.uncertainty_key) for item in sigma_value]
+                if any(item < 0 for item in sigmas):
+                    raise ValueError("standard uncertainties must be non-negative")
+                if spec.reducer == "mean":
+                    standard_uncertainty = math.sqrt(math.fsum(item * item for item in sigmas)) / len(sigmas)
+                elif spec.reducer in ("min", "max"):
+                    index = min(range(len(samples)), key=samples.__getitem__) if spec.reducer == "min" else max(range(len(samples)), key=samples.__getitem__)
+                    standard_uncertainty = sigmas[index]
+                elif spec.reducer == "rms":
+                    standard_uncertainty = (
+                        math.sqrt(math.fsum((samples[i] * sigmas[i]) ** 2 for i in range(len(samples))))
+                        / (len(samples) * value)
+                        if value != 0 else math.sqrt(math.fsum(item * item for item in sigmas)) / len(sigmas)
+                    )
+                uncertainty_assumption = "independent_samples_first_order"
+            if standard_uncertainty < 0:
+                raise ValueError("standard uncertainties must be non-negative")
+            if not math.isfinite(standard_uncertainty):
+                raise ValueError("standard uncertainty must be finite")
         extracted[spec.name] = {
             "value": value,
             "unit": spec.unit,
             "source": spec.source,
             "source_key": spec.key,
             "reducer": spec.reducer,
+            "standard_uncertainty": standard_uncertainty,
+            "uncertainty_source_key": spec.uncertainty_key,
+            "uncertainty_assumption": uncertainty_assumption,
         }
     encoded = json.dumps(extracted, sort_keys=True, separators=(",", ":"), allow_nan=False)
     return SpectralFeatureVector(
