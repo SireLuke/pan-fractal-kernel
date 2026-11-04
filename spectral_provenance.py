@@ -154,9 +154,13 @@ class SpectralObservation:
         """
         if not isinstance(event_id_prefix, str) or not event_id_prefix.strip():
             raise ValueError("event_id_prefix must be a non-empty string")
+        # Canonical JSON string keeps nested evidence immutable in Transition payloads.
+        observation_json = json.dumps(
+            self.canonical_record(), sort_keys=True, separators=(",", ":"), allow_nan=False
+        )
         base_payload = {
             "schema": RAW_SCHEMA,
-            "observation": self.canonical_record(),
+            "observation_json": observation_json,
             "observation_digest": self.digest,
         }
         formation_payload = dict(base_payload, janus_channel="UHFE_formation")
