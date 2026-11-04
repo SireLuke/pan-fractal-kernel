@@ -171,3 +171,33 @@ coordinates, not universal physical metrics. The Gosset 4_21 / E8 comparison
 interface remains intentionally unimplemented pending a separately specified
 and validated geometric metric adapter. No Euclidean V8 distance is presented
 as an E8 invariant or as evidence of physical correspondence.
+
+
+## Lightly weighted sandbox comparison diagnostics
+
+- `pan_sandbox_metrics.py` provides an optional secondary evidence layer for
+  selected PAN sandbox outputs. Metrics are compared only when their names,
+  units, direction, protocol ID, evidence class, role, and declared weight
+  match exactly.
+- Synthetic exploratory results receive an evidence factor of 0.25;
+  software/numerical checks 0.50; and reference comparisons 0.75. These are
+  conservative engineering policy weights, not empirically fitted
+  probabilities or scientific confidence levels.
+- Relative metric differences are bounded to [-1, 1] before aggregation so
+  raw units or large magnitudes cannot dominate. Context-only diagnostics
+  (including backward amplification, dissipative contraction, historical
+  replay failures, and configured Fermi filling) are retained but excluded
+  from the score.
+- `blend_primary_and_sandbox_score()` caps the secondary contribution at
+  10%; the default is 10%, leaving at least 90% of the blend to the caller's
+  primary score. The helper requires both scores to be on a declared [0, 1]
+  higher-is-better scale.
+- `historical_sandbox_reference_profile()` records selected historical
+  sandbox figures with protocol labels and provenance notes. They are not
+  treated as fresh observations or automatically comparable with a new run.
+- `tests/test_pan_sandbox_metrics.py` covers contract matching, evidence
+  weighting, context-only exclusions, score cap, and provenance digests.
+
+This layer is optional and cannot override primary experimental evidence,
+exact validation gates, or external reference agreement. A green software
+test remains a software result, not empirical validation of a physical claim.
