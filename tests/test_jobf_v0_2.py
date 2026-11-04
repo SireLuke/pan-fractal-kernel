@@ -216,3 +216,12 @@ def test_jobf_caches_base_geometry_for_repeated_direction_samples():
     assert calls == 1
     model.boundary(dirs.copy(), 0.2)
     assert calls == 1
+
+
+def test_external_janus_channel_drive_is_applied_and_validated():
+    model=JanusOctadialBreathingField(dt=.01); directions=sphere_directions(100,seed=91)
+    drive=np.linspace(-.2,.2,8)
+    _,_,_,diag=model.boundary(directions,.3,external_channel_drive=drive)
+    assert diag["external_channel_drive"]==pytest.approx(drive)
+    assert diag["effective_channels"]==pytest.approx(diag["channels"]+drive)
+    with pytest.raises(ValueError): model.boundary(directions,.3,external_channel_drive=(1,2))
