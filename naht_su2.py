@@ -36,7 +36,7 @@ class SU2:
 
     @classmethod
     def from_axis_angle(cls, axis: Iterable[float], angle: float) -> "SU2":
-        """Build exp(+i angle n.sigma/2) using the matrix convention below."""
+        """Build exp(-i angle n.sigma/2) using the matrix convention below."""
         vector = tuple(float(v) for v in axis)
         if len(vector) != 3 or not all(isfinite(v) for v in vector):
             raise ValueError("axis must contain three finite values")
