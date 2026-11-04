@@ -16,9 +16,15 @@ semantic record -> eight-channel V8 projections -> JOBF.
 - `qcd_reference.py`: transparent fixed-flavour one-loop QCD calculations.
 - `qcd_ingest.py`: provenance-aware alpha_s CSV loader and explicit V8 hand-off.
 - `JANUS_HYDRA_GEOMETRY.md`: architecture and validation contract.
+- `NAHT_QCD_JUNCTIONS.md`: proposed Non-Abelian History Transport (NAHT) design, including three-channel history, gauge-aware path transport, and Y/Delta baryonic network test topologies.
 
 The QCD layer is a benchmark/reference adapter. It does not equate SU(3)
 colour degrees of freedom with V8 coordinates, and it does not infer V8
 coordinates from alpha_s. Raw observables and provenance remain explicit.
+
+NAHT is a separate proposed history-transport layer. Its three PAN channels
+are not the three QCD colors or the eight SU(3) generators. QCD junction
+geometry is used as a comparative network benchmark, not as evidence that
+PAN models QCD.
 
 Run tests with `python -m pytest -q tests`.
