@@ -315,6 +315,62 @@ def historical_sandbox_reference_profile() -> SandboxMetricSet:
             provenance_note="Configured filling fraction; conservation residual was below 1e-15. The target value itself is not a quality score.",
         ),
     )
+        SandboxMetric(
+            "schrodinger_l2_norm_drift", 1.11e-15, "absolute_drift", "lower_is_better",
+            "schrodinger_norm_200_steps_v1", "software_numerical",
+            provenance_note="Historical solver invariant; 200 steps; two tested scale factors. Not V8 validation.",
+        ),
+        SandboxMetric(
+            "lotka_volterra_invariant_drift", 2.52e-10, "absolute_drift", "lower_is_better",
+            "lotka_volterra_dt_0p01_6000_steps_v1", "software_numerical",
+            provenance_note="Historical numerical invariant at dt=0.01 over 6,000 steps; separate solver benchmark.",
+        ),
+        SandboxMetric(
+            "schwarzschild_reduced_invariant_drift", 3.75e-16, "absolute_drift", "lower_is_better",
+            "schwarzschild_reduced_dt_0p005_12566_steps_v1", "software_numerical",
+            provenance_note="Reduced Schwarzschild solver invariant; not a full GRMHD or black-hole simulation.",
+        ),
+        SandboxMetric(
+            "maxwell_1d_e_rms_error", 8.55e-3, "normalized_rms_error", "lower_is_better",
+            "maxwell_1d_periodic_vacuum_256grid_v1", "reference_comparison",
+            sample_count=256,
+            provenance_note="1D periodic transverse vacuum wave, epsilon0=mu0=1, cosine analytic reference, Courant 0.4969.",
+        ),
+        SandboxMetric(
+            "maxwell_1d_b_rms_error", 6.13e-5, "normalized_rms_error", "lower_is_better",
+            "maxwell_1d_periodic_vacuum_256grid_v1", "reference_comparison",
+            sample_count=256,
+            provenance_note="Same restricted 1D Maxwell analytic-reference run; zero energy drift was run-specific.",
+        ),
+        SandboxMetric(
+            "v8_holdout_accuracy", 0.30, "fraction", "context_only",
+            "v8_cluster_holdout_four_coordinates_v1", "reference_comparison",
+            role="context",
+            provenance_note="Historical holdout accuracy 0.30; only 4/8 coordinates scored. Weak/non-predictive result retained as caution.",
+        ),
+        SandboxMetric(
+            "v8_clustering_adjusted_rand_index", 0.047, "ari", "context_only",
+            "v8_cluster_holdout_four_coordinates_v1", "reference_comparison",
+            role="context",
+            provenance_note="Historical ARI 0.047 with permutation p=0.77; clustering unstable and coordinate ablation non-informative.",
+        ),
+        SandboxMetric(
+            "randomized_v8_bounded_state_rate", 1.0, "fraction", "higher_is_better",
+            "v8_randomized_quadrant_2000_seeded_v1", "synthetic_exploratory",
+            sample_count=2000,
+            provenance_note="2,000 seeded random V8 states; 100% bounded-state compliance is a software stress result, not physical evidence.",
+        ),
+        SandboxMetric(
+            "golden_ratio_identity_error", 0.0, "absolute_error", "lower_is_better",
+            "golden_ratio_phi_identity_v1", "software_numerical",
+            provenance_note="Algebraic identity check phi^2=phi+1; exact arithmetic/property check, not empirical evidence.",
+        ),
+        SandboxMetric(
+            "quadrant_classification_means", 0.0, "placeholder", "context_only",
+            "v8_randomized_quadrant_2000_seeded_v1", "synthetic_exploratory",
+            role="context",
+            provenance_note="Historical formation/dissolution quadrant counts and means; means are classification-circular and intentionally not scored.",
+        ),
     return SandboxMetricSet(
         experiment_id="pan_sandbox_historical_reference",
         metrics=metrics,
