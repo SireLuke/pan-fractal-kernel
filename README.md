@@ -89,6 +89,7 @@ retaining the raw observation and its provenance unchanged.
   or derived observation fields using scalar, mean, min, max, or RMS reducers.
 - `FeatureSpec` requires an explicit source, key, unit label, and reducer;
   modality names never trigger hidden feature selection.
+  Raw-feature unit labels are checked against the observation's declared units.
 - `project_features_to_v8()`: opt-in linear mapping into all eight canonical
   V8 coordinates. Every coordinate requires an explicit mapping, with optional
   explicit offsets. No implicit clipping, normalization, or coordinate
