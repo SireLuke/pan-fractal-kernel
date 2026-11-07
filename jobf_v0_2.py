@@ -46,7 +46,7 @@ def aggregate_heads(head_scores: dict[str, float], inverse: bool = False) -> np.
 class JanusOctadialBreathingField:
     """JOBF dynamics with the Hydra Semantic Reader as its sole semantic gateway."""
 
-    def __init__(self, dt=0.01, shape_bias=0.0, softening=0.25):
+    def __init__(self, dt=0.01, shape_bias=0.0, softening=0.25, geometry="gosset"):
         if dt <= 0 or not np.isfinite(dt):
             raise ValueError("dt must be finite and positive")
         self.dt = float(dt)
@@ -213,10 +213,12 @@ def main():
     parser.add_argument("--dt", type=float, default=.01)
     parser.add_argument("--samples", type=int, default=4096)
     parser.add_argument("--shape-bias", type=float, default=0.0)
+    parser.add_argument("--geometry", choices=("gosset", "cross_polytope"), default="gosset",
+                        help="Primary Gosset 4_21 geometry or explicit legacy H8 comparison.")
     parser.add_argument("--output", type=Path, default=Path("jobf_output"))
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
-    model = JanusOctadialBreathingField(args.dt, args.shape_bias)
+    model = JanusOctadialBreathingField(args.dt, args.shape_bias, geometry=args.geometry)
     times, directions, rows, snapshots = model.simulate(args.steps, args.samples)
     csv_path = args.output/"jobf_v0_2_metrics.csv"
     png_path = args.output/"jobf_v0_2_diagnostics.png"
