@@ -1,0 +1,25 @@
+name: PAN V9 affine E8 and Janus v1 validation
+
+on:
+  push:
+    branches: [feat/pan-v9-affine-e8-janus-v1]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  v9-janus-focused-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install focused test dependencies
+        run: python -m pip install --upgrade pip numpy pytest
+      - name: Run V9 affine-E8, Janus v1, and Gosset projection tests
+        env:
+          MPLBACKEND: Agg
+        run: python -m pytest -q tests/test_v9_affine_e8_projection.py tests/test_janus_dynamic_inverse_v1.py tests/test_gosset_projection.py
