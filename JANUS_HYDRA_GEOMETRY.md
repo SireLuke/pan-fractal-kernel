@@ -23,7 +23,7 @@ The reader returns a `HydraSemanticFrame` containing the validated state, five U
 
 ## Janus Hydra vocabulary
 
-Janus Hydra is the canonical name for the coupled formation/dissolution semantic architecture. UHFE and UDFE are not two halves of the geometry: they are distinct semantic fields evaluated over the same complete V8 domain.
+Janus Hydra is the fractal-geometric semantic translator. It is distinct from the V8 manifold and is not UHFE or UDFE. V8 is the canonical eight-coordinate input state; Janus Hydra translates it into paired semantic representations; UHFE is the formation-side output field; UDFE is the dissolution-side output field. These are separate architectural layers and must not be conflated.
 
 | UHFE head | V8 support | UDFE inverse head |
 |---|---|---|
@@ -50,13 +50,13 @@ The normalized complement is (C(x)=1-x), with (C(C(x))=x). The reference UDFE sc
 B^-=(d+(1-u)+(1-h))/3
 ]
 [
-H^-=((1-tau)+(1-s))/2,quad W^-=((1-f)+(1-h)+(1-R))/3
+H^-=(d+(1-tau)+(1-s))/3,quad W^-=(d+(1-f)+(1-h)+(1-R))/4
 ]
 [
-C^-=((1-chi)+(1-tau)+(1-R))/3,quad E^-=((1-s)+(1-h)+d)/3.
+C^-=(d+(1-chi)+(1-tau)+(1-R))/4,quad E^-=(d+(1-s)+(1-h))/3.
 ]
 
-The d term is deliberately retained in AntiBubble and inverse CompoundEye as a dissolution-side signal. Preserve this as a versioned semantic rule.
+Under JANUS-HYDRA-DYNAMIC-INVERSE-v1, dissolution density d is coupled into all five inverse heads. The five exact pair defects delta_k = H_k + D_k - 1 are Bubble (R+d-1)/3; CompoundEye (2d-1)/3; Honeycomb (tau+s+2d-2)/6; SpiderWeb (f+h+R+3d-3)/12; and ChiralDNA (chi+tau+R+3d-3)/12. These are model discrepancies requiring interpretation and calibration; a nonzero defect is not evidence of physical significance.
 
 ## Shared geometry and independent fields
 
@@ -88,6 +88,12 @@ The eight V8 coordinate channels remain distinct from the 256 sign orthants of R
 8. Gosset 4_21 is the default JOBF geometry; cross-polytope H8 remains explicitly selectable as a comparison baseline.
 9. Geometry selection does not alter V8 coordinate order, semantic head values, or the paired UHFE/UDFE records.
 10. JOBF's production radial boundary is always Gosset 4_21; H8 is comparison-only and cannot be selected as a JOBF boundary.\n11. Numerical success validates implementation invariants, not a physical interpretation.
+
+## Experimental V9 affine-E8 projection view
+
+The isolated V9 experiment adds a normalized traversal parameter xi in [0,1] to a continuous orthogonal display-frame family over the existing E8 source coordinates. It does not assert a ninth Euclidean root coordinate. The canonical 240 roots and source indices remain retained; lower-dimensional projections remain explicitly lossy. Continuous display rotations are not generally E8 lattice automorphisms. The affine Weyl translations act on the full E8 lattice; translating the finite 240-root subset does not leave that subset fixed.
+
+V9 view traversal does not alter V8, Janus scores, UHFE/UDFE histories, or canonical records. See PAN_V9_AFFINE_E8_EXPERIMENT.md. SU(9) and nine-spatial-dimensional Navier-Stokes remain separate research questions, not implemented consequences of affine E8.
 
 ## Data ingestion
 
