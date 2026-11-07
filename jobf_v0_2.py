@@ -16,11 +16,11 @@ import matplotlib.pyplot as plt
 try:
     from .janus_hydra import V8State, golden_angle_phases
     from .hydra_semantic_reader import read_semantics, project_heads, HEAD_SUPPORT, INVERSE_NAMES
-    from .geometry_adapter import CrossPolytopeAdapter, get_geometry
+    from .geometry_adapter import CrossPolytopeAdapter, Gosset421Adapter
 except ImportError:
     from janus_hydra import V8State, golden_angle_phases
     from hydra_semantic_reader import read_semantics, project_heads, HEAD_SUPPORT, INVERSE_NAMES
-    from geometry_adapter import CrossPolytopeAdapter, get_geometry
+    from geometry_adapter import CrossPolytopeAdapter, Gosset421Adapter
 
 DIM = 8
 KEYS = ("h", "R", "u", "d", "tau", "chi", "s", "f")
@@ -52,9 +52,9 @@ class JanusOctadialBreathingField:
         self.dt = float(dt)
         self.shape_bias = float(shape_bias)
         self.softening = float(softening)
-        self.geometry = get_geometry(geometry) if isinstance(geometry, str) else geometry
-        if not hasattr(self.geometry, "radial_boundary_many"):
-            raise TypeError("geometry must provide radial_boundary_many(directions)")
+        # Production JOBF is permanently anchored to Gosset 4_21.
+        # H8 remains available only through the standalone comparison adapter.
+        self.geometry = Gosset421Adapter()
         if self.softening <= 0:
             raise ValueError("softening must be positive")
 
@@ -98,7 +98,7 @@ class JanusOctadialBreathingField:
         )
         return global_breath, channels, state, uh_heads, ud_heads, uh, ud, cross
 
-    def boundary(self, directions: np.ndarray, t: float):
+    def boundary(self, directions: np.ndarray, t: float, *, external_channel_drive=None):
         if directions.ndim != 2 or directions.shape[1] != DIM:
             raise ValueError("directions must have shape (N, 8)")
         # Directions are fixed across JOBF time steps. Cache the expensive
@@ -113,14 +113,22 @@ class JanusOctadialBreathingField:
         weights = directions**2
         weights /= weights.sum(axis=1, keepdims=True)
         gb, channels, state, uh_heads, ud_heads, uh, ud, cross = self.channel_state(t)
-        exponent = gb + weights @ channels
+        if external_channel_drive is None:
+            drive = np.zeros(DIM, dtype=float)
+        else:
+            drive = np.asarray(external_channel_drive, dtype=float)
+            if drive.shape != (DIM,) or not np.all(np.isfinite(drive)):
+                raise ValueError("external_channel_drive must contain 8 finite values")
+        effective_channels = channels + drive
+        exponent = gb + weights @ effective_channels
         if self.shape_bias:
             q = directions * rho0[:, None]
             r2 = np.sum(q*q, axis=1)
             exponent += -self.shape_bias / np.sqrt(r2 + self.softening**2)
         rho = rho0 * np.exp(exponent)
         diagnostics = {
-            "global_breath": gb, "channels": channels, "state": state,
+            "global_breath": gb, "channels": channels,
+            "external_channel_drive": drive, "effective_channels": effective_channels, "state": state,
             "uhfe_heads": uh_heads, "udfe_heads": ud_heads,
             "uhfe_channels": uh, "udfe_channels": ud, "interference": cross,
             "geometry": self.geometry.name,
