@@ -1,0 +1,23 @@
+name: lattice-gauge
+on:
+  pull_request:
+  push:
+    branches-ignore: [main]      # never run release steps from main; merges go through PRs
+jobs:
+  conformance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install numpy scipy
+      - name: Independence gate (core imports no PAN module)
+        run: python lattice_gauge/tests/test_core_independence.py
+      - name: Conformance suite (exact / published reference values)
+        run: python lattice_gauge/tests/test_lattice_gauge.py
+      - name: DCO sign-off present on every commit in the PR
+        if: github.event_name == 'pull_request'
+        run: |
+          git fetch origin ${{ github.base_ref }}
+          bad=$(git log --format='%H' origin/${{ github.base_ref }}..HEAD | while read c; do git show -s --format=%B $c | grep -q '^Signed-off-by:' || echo $c; done)
+          test -z "$bad" || { echo "Missing Signed-off-by on: $bad"; exit 1; }
