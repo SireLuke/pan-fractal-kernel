@@ -4,90 +4,92 @@
 
 ## Canonical execution path
 
-The **Hydra Semantic Reader is the primary semantic gateway into V8 and JOBF**:
+The Hydra Semantic Reader is the primary semantic gateway into V8 and JOBF:
 
-`source / calibrated semantic input
-  -> hydra_semantic_reader.coerce_v8_state
-  -> Janus Hydra UHFE + UDFE interpretation
-  -> explicit paired-head record
-  -> two eight-channel V8 projections
-  -> JOBF field coupling / boundary evaluation`
+    source / calibrated semantic input
+      -> hydra_semantic_reader.coerce_v8_state
+      -> Janus Hydra semantic translation
+      -> separate UHFE formation and UDFE dissolution outputs
+      -> explicit paired-head record
+      -> two eight-channel V8 projections
+      -> JOBF field coupling / boundary evaluation
 
 All normalized inputs are validated against the canonical V8 order:
 
-`V8 = (h, R, u, d, tau, chi, s, f)`
+    V8 = (h, R, u, d, tau, chi, s, f)
 
-The reader accepts a `V8State`, a mapping using those exact coordinate names, or an eight-value sequence in that order. The provisional `T` alias is accepted for `tau` only when `tau` is not also supplied. Inputs outside [0,1], missing coordinates, and unexpected keys are rejected; values are never silently clamped.
+The reader accepts a V8State, a mapping using those exact coordinate names, or an eight-value sequence in that order. The provisional T alias is accepted for tau only when tau is not also supplied. Inputs outside [0,1], missing coordinates, and unexpected keys are rejected; values are never silently clamped.
 
-The reader returns a `HydraSemanticFrame` containing the validated state, five UHFE heads, five distinctly named UDFE inverse heads, explicit pair records, and two independent eight-channel projections. JOBF and the observational/GRMHD ingestion bridge consume this frame rather than reimplementing the semantic mapping.
+## Architecture boundary
 
-## Janus Hydra vocabulary
+Janus Hydra is the fractal-geometric semantic translator. It is distinct from the V8 manifold and does not equal either output field.
 
-Janus Hydra is the canonical name for the coupled formation/dissolution semantic architecture. UHFE and UDFE are not two halves of the geometry: they are distinct semantic fields evaluated over the same complete V8 domain.
+- V8: canonical eight-coordinate input manifold/state.
+- Janus Hydra: translates V8 states into paired semantic head representations.
+- UHFE: formation-side semantic field and heads.
+- UDFE: dissolution-side semantic field and inverse heads.
+- Gosset 4_21: primary eight-dimensional geometric foundation.
 
-| UHFE head | V8 support | UDFE inverse head |
-|---|---|---|
-| Bubble | (h, R, u) | `antibubble_cavitation` |
-| Honeycomb | (tau, s) | `inversehoneycomb` |
-| SpiderWeb | (f, h, R) | `inversespiderweb_radialvoid` |
-| ChiralDNA | (chi, tau, R) | `chiralvoid` |
-| CompoundEye | (s, h, d) | `discretesingulardots_inversecompoundeye` |
+Do not conflate Janus Hydra with UHFE or UDFE. They are separate architectural layers.
 
-The inverse names are intentionally not renamed to match the UHFE keys. The semantic reader pairs them explicitly, preserving the Janus distinction and the provenance of each inverse rule.
+## Five semantic pairs
 
-Baseline UHFE scores:
+| UHFE formation head | Formation support | UDFE inverse head | Inverse support |
+|---|---|---|---|
+| Bubble | (h, R, u) | antibubble_cavitation | (d, u, h) |
+| CompoundEye | (s, h, d) | discretesingulardots_inversecompoundeye | (d, s, h) |
+| Honeycomb | (tau, s) | inversehoneycomb | (d, tau, s) |
+| SpiderWeb | (f, h, R) | inversespiderweb_radialvoid | (d, f, h, R) |
+| ChiralDNA | (chi, tau, R) | chiralvoid | (d, chi, tau, R) |
 
-[
-B=(h+R+u)/3,quad H=(tau+s)/2,quad W=(f+h+R)/3
-]
-[
-C=(chi+tau+R)/3,quad E=(s+h+d)/3.
-]
+All eight V8 coordinates are covered by the five formation heads and by the five inverse heads. Each inverse head explicitly couples dissolution density d.
 
-The normalized complement is (C(x)=1-x), with (C(C(x))=x). The reference UDFE scores are:
+## Canonical JANUS-HYDRA-DYNAMIC-INVERSE-v1 equations
 
-[
-B^-=(d+(1-u)+(1-h))/3
-]
-[
-H^-=((1-tau)+(1-s))/2,quad W^-=((1-f)+(1-h)+(1-R))/3
-]
-[
-C^-=((1-chi)+(1-tau)+(1-R))/3,quad E^-=((1-s)+(1-h)+d)/3.
-]
+Formation scores:
 
-The d term is deliberately retained in AntiBubble and inverse CompoundEye as a dissolution-side signal. Preserve this as a versioned semantic rule.
+    B=(h+R+u)/3
+    E=(s+h+d)/3
+    H=(tau+s)/2
+    W=(f+h+R)/3
+    C=(chi+tau+R)/3
 
-## Shared geometry and independent fields
+Inverse scores:
 
-The primary shared geometric domain is the **Gosset 4_21 polytope**, the convex hull of the 240 E8 roots in R^8. The canonical root normalization is ||alpha||^2=2. Its 1-skeleton has 240 vertices, 56 nearest neighbors per vertex, and 6,720 edges. See `GOSSET_421_GEOMETRY.md` and `gosset_421.py` for the exact root construction and invariants.
+    B^-=(d+(1-u)+(1-h))/3
+    E^-=(d+(1-s)+(1-h))/3
+    H^-=(d+(1-tau)+(1-s))/3
+    W^-=(d+(1-f)+(1-h)+(1-R))/4
+    C^-=(d+(1-chi)+(1-tau)+(1-R))/4
 
-JOBF evaluates the radial function of this convex body from the shared origin. For a unit direction n,
+For each pair, delta_k = H_k + D_k - 1. The exact identities are:
 
-[
-rho_G(n)=max{r >= 0 : r n in conv(E8_ROOTS)}.
-]
+- Bubble: (R+d-1)/3
+- CompoundEye: (2d-1)/3
+- Honeycomb: (tau+s+2d-2)/6
+- SpiderWeb: (f+h+R+3d-3)/12
+- ChiralDNA: (chi+tau+R+3d-3)/12
 
-The implementation uses a cached convex-hull facet representation and vectorized ray/facet intersections. It does **not** use the support function as though it were the radial function, and it does not solve one linear program per sample in the simulation hot loop. The optional LP in `gosset_421.py` remains a reference/checking method.
+These are model discrepancies/diagnostics. A nonzero defect has no implied physical meaning and requires interpretation and calibration.
 
-The 8D cross-polytope H8={q in R^8: sum_i |q_i|<=1} is retained as an independently callable legacy/comparison geometry, with radial function rho_H(n)=1/sum_i|n_i| for unit n. It is not interchangeable with Gosset 4_21 and is **not a JOBF boundary option**. The production JOBF geometric boundary is permanently fixed to the convex hull of the 240 E8 roots (Gosset 4_21). The JOBF constructor and CLI expose no geometry switch. H8 may be evaluated separately as a comparison baseline, but it cannot replace or route around the Gosset boundary in JOBF.
+## Gosset geometry and projection separation
 
-The origin is the shared waist/reference point. UHFE and UDFE are not assigned opposite geometric halves and are not split into separate domains. They maintain independent histories and parameters. Do not impose (U_D=1-U_H). JOBF uses centered field deviations and an explicit interaction term to deform the canonical Gosset radial boundary. For finite exponents, the exponential radial law remains positive. This is a candidate computational shape-evolution rule, not a law derived from physics.
+The primary shared geometric domain is the Gosset 4_21 polytope, the convex hull of the 240 E8 roots in R^8. The canonical root normalization is ||alpha||^2=2. Its 1-skeleton has 240 vertices, 56 nearest neighbors per vertex, and 6,720 edges.
 
-The eight V8 coordinate channels remain distinct from the 256 sign orthants of R^8 and from the 240 E8 root vertices. Sign-symmetric directional weights use (w_i=n_i^2/sum_j n_j^2); chirality requires a separately specified orientation-sensitive operator. The geometry adapter changes the spatial boundary calculation only; it does not mutate V8 records or alter UHFE/UDFE head semantics.
+The 8D cross-polytope remains a separate comparison geometry, not a substitute for Gosset 4_21. Eight V8 semantic coordinates are not the 240 E8 roots and are not the 256 sign orthants of R^8.
+
+The projection engine retains original E8 coordinates and root indices. Lower-dimensional views report reconstruction residuals and do not redefine adjacency. The experimental V9 affine-E8 view family adds a normalized traversal parameter xi in [0,1]; xi changes the orthogonal display frame, not the canonical root set or V8 semantic state. Continuous display rotations are not generally E8 lattice automorphisms.
 
 ## Validation contract
 
 1. V8 order is stable: (h, R, u, d, tau, chi, s, f).
 2. The reader rejects malformed, non-finite, and out-of-range inputs.
-3. Exactly five UHFE and five UDFE heads are produced with their own vocabulary.
-4. Each UHFE head is explicitly paired to its named UDFE inverse.
-5. Both projections contain eight finite channels over the same domain.
-6. The origin remains shared; the domain is not divided into two half-polytopes.
-7. Finite JOBF inputs produce finite positive radial boundaries under the selected adapter.
-8. Gosset 4_21 is the default JOBF geometry; cross-polytope H8 remains explicitly selectable as a comparison baseline.
-9. Geometry selection does not alter V8 coordinate order, semantic head values, or the paired UHFE/UDFE records.
-10. JOBF's production radial boundary is always Gosset 4_21; H8 is comparison-only and cannot be selected as a JOBF boundary.\n11. Numerical success validates implementation invariants, not a physical interpretation.
+3. Exactly five UHFE and five UDFE heads are produced with distinct vocabularies.
+4. Every inverse head uses density d under the canonical v1 baseline.
+5. The five exact pair-defect identities are regression tested.
+6. Formation and inverse projection support maps are separate and each covers all eight coordinates.
+7. Geometry/view operations do not mutate V8 records or Janus semantic scores.
+8. Numerical success validates implementation invariants, not a physical interpretation.
 
 ## Data ingestion
 
