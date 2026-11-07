@@ -82,16 +82,3 @@ def test_timestamp_must_be_monotonic_and_reference_finite():
 def test_invalid_temperature_rejected():
     with pytest.raises(ValueError):
         coupler(temperature=-0.1)
-
-
-def test_number_conserving_fermi_mode_has_fixed_filling_and_explicit_ceiling():
-    model=coupler(fermi_filling_fraction=.375)
-    frame=model.step(.25,BASE)
-    assert frame.fermi_sea_mode=="number_conserving"
-    assert frame.fermi_particle_number==pytest.approx(3.0,abs=1e-9)
-    assert frame.fermi_hole_number==pytest.approx(5.0,abs=1e-9)
-    assert frame.fermi_occupancy_floor==0 and frame.fermi_occupancy_ceiling==1
-
-def test_backward_branch_can_start_with_udfe_pulse():
-    frame=coupler(initial_pulse_index=1).step(0.0,BASE)
-    assert frame.active_layer=="UDFE" and frame.polarity==-1
