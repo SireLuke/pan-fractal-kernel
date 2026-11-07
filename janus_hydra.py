@@ -1,14 +1,16 @@
-"""PAN V8 Janus Hydra geometric-language kernel.
+"""Janus Hydra semantic translator for the PAN V8 state.
 
-Reference projections for the five UHFE heads and their UDFE inverse
-vocabulary. Inputs are normalized V8 coordinates in [0, 1]. This is a
-computational geometry layer, not a physical field solver.
+Janus Hydra translates normalized V8 states into paired semantic scores.
+UHFE (formation) and UDFE (dissolution) are distinct output fields; Janus
+Hydra is neither field. This module is a computational semantic layer, not
+a physical field solver.
 """
 from __future__ import annotations
 from dataclasses import dataclass, asdict
 import math
 
 V8_KEYS = ("h", "R", "u", "d", "tau", "chi", "s", "f")
+JANUS_BASELINE = "JANUS-HYDRA-DYNAMIC-INVERSE-v1"
 PHI = (1.0 + math.sqrt(5.0)) / 2.0
 
 @dataclass(frozen=True)
@@ -21,7 +23,6 @@ class V8State:
     chi: float
     s: float
     f: float
-
     def validate(self) -> None:
         for key, value in asdict(self).items():
             if not math.isfinite(value) or not 0.0 <= value <= 1.0:
@@ -34,7 +35,7 @@ def complement(x: float) -> float:
     return 1.0 - x
 
 def formation_heads(v: V8State) -> dict[str, float]:
-    """UHFE: Bubble, Honeycomb, SpiderWeb, ChiralDNA, CompoundEye."""
+    """UHFE formation scores; canonical V8 support is unchanged."""
     v.validate()
     return {
         "bubble": (v.h + v.R + v.u) / 3.0,
@@ -45,20 +46,19 @@ def formation_heads(v: V8State) -> dict[str, float]:
     }
 
 def inverse_heads(v: V8State) -> dict[str, float]:
-    """UDFE inverse language; d remains an explicit dissolution signal
-    in AntiBubble and inverse CompoundEye, following the project mapping.
-    """
+    """UDFE dynamic inverse scores under JANUS-HYDRA-DYNAMIC-INVERSE-v1."""
     v.validate()
     c = complement
     return {
         "antibubble_cavitation": (v.d + c(v.u) + c(v.h)) / 3.0,
-        "inversehoneycomb": (c(v.tau) + c(v.s)) / 2.0,
-        "inversespiderweb_radialvoid": (c(v.f) + c(v.h) + c(v.R)) / 3.0,
-        "chiralvoid": (c(v.chi) + c(v.tau) + c(v.R)) / 3.0,
-        "discretesingulardots_inversecompoundeye": (c(v.s) + c(v.h) + v.d) / 3.0,
+        "discretesingulardots_inversecompoundeye": (v.d + c(v.s) + c(v.h)) / 3.0,
+        "inversehoneycomb": (v.d + c(v.tau) + c(v.s)) / 3.0,
+        "inversespiderweb_radialvoid": (v.d + c(v.f) + c(v.h) + c(v.R)) / 4.0,
+        "chiralvoid": (v.d + c(v.chi) + c(v.tau) + c(v.R)) / 4.0,
     }
 
 def paired_heads(v: V8State) -> dict[str, dict[str, float | str]]:
+    """Pair each formation score with its named, versioned inverse score."""
     f, inv = formation_heads(v), inverse_heads(v)
     pairs = {
         "bubble": "antibubble_cavitation",
@@ -67,8 +67,8 @@ def paired_heads(v: V8State) -> dict[str, dict[str, float | str]]:
         "chiraldna": "chiralvoid",
         "compoundeye": "discretesingulardots_inversecompoundeye",
     }
-    return {k: {"formation": f[k], "inverse": inv[j],
-                "inverse_rule": "semantic_complement_v1"} for k, j in pairs.items()}
+    return {key: {"formation": f[key], "inverse": inv[inverse_key],
+                  "inverse_rule": JANUS_BASELINE} for key, inverse_key in pairs.items()}
 
 def cross_polytope_radius(direction: tuple[float, ...]) -> float:
     """Radial boundary for the unit 8D cross-polytope sum(|q_i|)<=1."""
