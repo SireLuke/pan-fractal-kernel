@@ -19,5 +19,5 @@ jobs:
         if: github.event_name == 'pull_request'
         run: |
           git fetch origin ${{ github.base_ref }}
-          bad=$(git log --format='%H' origin/${{ github.base_ref }}..HEAD | while read c; do git show -s --format=%B $c | grep -q '^Signed-off-by:' || echo $c; done)
+          bad=$(git log --no-merges --format='%H' origin/${{ github.base_ref }}..HEAD | while read c; do git show -s --format=%B $c | grep -q '^Signed-off-by:' || echo $c; done)
           test -z "$bad" || { echo "Missing Signed-off-by on: $bad"; exit 1; }
