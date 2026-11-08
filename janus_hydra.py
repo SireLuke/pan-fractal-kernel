@@ -1,7 +1,7 @@
 """Janus Hydra semantic translator for the PAN V8 state.
 
 Janus Hydra translates normalized V8 states into paired semantic scores.
-UHFE (formation) and UDFE (dissolution) are distinct output fields; Janus
+UHFE (formation) and UDFE (decoherence) are distinct output fields; Janus
 Hydra is neither field. This module is a computational semantic layer, not
 a physical field solver.
 """

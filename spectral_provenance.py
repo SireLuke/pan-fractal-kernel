@@ -3,7 +3,7 @@
 Raw instrument observations are retained as canonical JSON strings. Derived
 values, uncertainty, calibration, instrument metadata, and source provenance
 are stored separately. Janus events reference the same observation; the
-formation/dissolution labels describe paired processing channels, not a claim
+formation/decoherence labels describe paired processing channels, not a claim
 that the measured signal itself is physically created or destroyed.
 """
 from __future__ import annotations

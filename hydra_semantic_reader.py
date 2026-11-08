@@ -1,7 +1,7 @@
 """Canonical Janus Hydra semantic reader and V8 projection pipeline.
 
 Janus Hydra is the semantic translator. UHFE and UDFE are distinct formation
-and dissolution outputs produced from the same validated V8 state.
+and decoherence outputs produced from the same validated V8 state.
 """
 from __future__ import annotations
 from dataclasses import dataclass

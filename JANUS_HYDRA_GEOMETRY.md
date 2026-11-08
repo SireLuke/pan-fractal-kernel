@@ -23,7 +23,7 @@ The reader returns a `HydraSemanticFrame` containing the validated state, five U
 
 ## Janus Hydra vocabulary
 
-Janus Hydra is the fractal-geometric semantic translator. It is distinct from the V8 manifold and is not UHFE or UDFE. V8 is the canonical eight-coordinate input state; Janus Hydra translates it into paired semantic representations; UHFE is the formation-side output field; UDFE is the dissolution-side output field. These are separate architectural layers and must not be conflated.
+Janus Hydra is the fractal-geometric semantic translator. It is distinct from the V8 manifold and is not UHFE or UDFE. V8 is the canonical eight-coordinate input state; Janus Hydra translates it into paired semantic representations; UHFE is the formation-side output field; UDFE is the decoherence-side output field. These are separate architectural layers and must not be conflated.
 
 | UHFE head | V8 support | UDFE inverse head |
 |---|---|---|
@@ -56,7 +56,7 @@ H^-=(d+(1-tau)+(1-s))/3,quad W^-=(d+(1-f)+(1-h)+(1-R))/4
 C^-=(d+(1-chi)+(1-tau)+(1-R))/4,quad E^-=(d+(1-s)+(1-h))/3.
 ]
 
-Under JANUS-HYDRA-DYNAMIC-INVERSE-v1, dissolution density d is coupled into all five inverse heads. The five exact pair defects delta_k = H_k + D_k - 1 are Bubble (R+d-1)/3; CompoundEye (2d-1)/3; Honeycomb (tau+s+2d-2)/6; SpiderWeb (f+h+R+3d-3)/12; and ChiralDNA (chi+tau+R+3d-3)/12. These are model discrepancies requiring interpretation and calibration; a nonzero defect is not evidence of physical significance.
+Under JANUS-HYDRA-DYNAMIC-INVERSE-v1, decoherence density d is coupled into all five inverse heads. The five exact pair defects delta_k = H_k + D_k - 1 are Bubble (R+d-1)/3; CompoundEye (2d-1)/3; Honeycomb (tau+s+2d-2)/6; SpiderWeb (f+h+R+3d-3)/12; and ChiralDNA (chi+tau+R+3d-3)/12. These are model discrepancies requiring interpretation and calibration; a nonzero defect is not evidence of physical significance.
 
 ## Shared geometry and independent fields
 
@@ -85,9 +85,10 @@ The eight V8 coordinate channels remain distinct from the 256 sign orthants of R
 5. Both projections contain eight finite channels over the same domain.
 6. The origin remains shared; the domain is not divided into two half-polytopes.
 7. Finite JOBF inputs produce finite positive radial boundaries under the selected adapter.
-8. Gosset 4_21 is the default JOBF geometry; cross-polytope H8 remains explicitly selectable as a comparison baseline.
+8. Gosset 4_21 is the default JOBF geometry; cross-polytope H8 remains available only as the standalone CrossPolytopeAdapter comparison baseline, not as a JOBF option.
 9. Geometry selection does not alter V8 coordinate order, semantic head values, or the paired UHFE/UDFE records.
-10. JOBF's production radial boundary is always Gosset 4_21; H8 is comparison-only and cannot be selected as a JOBF boundary.\n11. Numerical success validates implementation invariants, not a physical interpretation.
+10. JOBF's production radial boundary is always Gosset 4_21; H8 is comparison-only and cannot be selected as a JOBF boundary.
+11. Numerical success validates implementation invariants, not a physical interpretation.
 
 ## Experimental V9 affine-E8 projection view
 
