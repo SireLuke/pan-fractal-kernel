@@ -28,8 +28,24 @@ def test_pair_defect_closed_forms():
         d = pair_defect(s)
         assert d["bubble"] == pytest.approx((s.R + s.d - 1) / 3, abs=1e-12)
         assert d["compoundeye"] == pytest.approx((2 * s.d - 1) / 3, abs=1e-12)
-        for k in ("honeycomb", "spiderweb", "chiraldna"):
-            assert d[k] == pytest.approx(0.0, abs=1e-12)
+        # JANUS-HYDRA-DYNAMIC-INVERSE-v1: every inverse head carries d, so no defect is identically zero
+        assert d["honeycomb"] == pytest.approx((s.tau + s.s + 2 * s.d - 2) / 6, abs=1e-12)
+        assert d["spiderweb"] == pytest.approx((s.f + s.h + s.R + 3 * s.d - 3) / 12, abs=1e-12)
+        assert d["chiraldna"] == pytest.approx((s.chi + s.tau + s.R + 3 * s.d - 3) / 12, abs=1e-12)
+
+
+def test_v1_defect_gradient_rank_is_five():
+    # defects are affine in the 8 coordinates, so a finite difference is exact; the old kernel had rank 2
+    import numpy as np
+    from janus_hydra import V8State, V8_KEYS
+    keys = ("bubble", "honeycomb", "spiderweb", "chiraldna", "compoundeye")
+    base = dict.fromkeys(V8_KEYS, 0.5)
+    J = np.zeros((5, 8))
+    for j, k in enumerate(V8_KEYS):
+        lo, hi = dict(base), dict(base); lo[k], hi[k] = 0.4, 0.6
+        dl, dh = pair_defect(V8State(**lo)), pair_defect(V8State(**hi))
+        J[:, j] = [(dh[n] - dl[n]) / 0.2 for n in keys]
+    assert np.linalg.matrix_rank(J, tol=1e-9) == 5
 
 
 def test_structural_metrics_are_pinned():
@@ -37,8 +53,8 @@ def test_structural_metrics_are_pinned():
     assert m["rank_formation"] == 5 and m["nullity_formation"] == 3
     assert m["rank_stacked"] == 7
     assert m["lipschitz_linf"] == pytest.approx(1.0)
-    assert m["tautological_pairs"] == ["honeycomb", "spiderweb", "chiraldna"]
-    assert m["informative_pairs"] == ["bubble", "compoundeye"]
+    assert m["tautological_pairs"] == []
+    assert m["informative_pairs"] == ["bubble", "honeycomb", "spiderweb", "chiraldna", "compoundeye"]
     assert m["participation_ratio"] == pytest.approx(3.358, abs=1e-3)
 
 
