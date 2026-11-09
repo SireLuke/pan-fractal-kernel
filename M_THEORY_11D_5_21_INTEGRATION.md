@@ -131,3 +131,7 @@ so the allowed linear subspace has dimension 8, not 10. Additional congruence co
 This is a particularly useful representation to investigate alongside M-theory, because flat 11D spacetime has ten spatial directions (R^10 on a constant-time slice). However, the shared number ten does not identify the Du Val coordinate space with M-theory's physical spatial slice. A physical identification would require a metric-compatible embedding plus a theory-specific field/compactification ansatz. Keep the two R^10 spaces as distinct typed objects until such a map is explicitly constructed.
 
 Reference: H. S. M. Coxeter, “Regular and Semi-Regular Polytopes III,” Mathematical Zeitschrift 200 (1988), pp. 3–45, discussion of Du Val's ten-dimensional coordinates for 5_21. The two sum constraints reduce the coordinate subspace to dimension eight; the congruences specify the lattice within it.
+
+The congruence condition used in the independent reconstruction, cross-checked against the explicit coordinate examples in Coxeter's table, is:
+x1 ≡ x2 ≡ x3 ≡ x4 ≡ x5 ≡ 2x6 ≡ 2x7 ≡ 2x8 ≡ 2x9 ≡ 2x10 (mod 5).
+The searchable PDF text has OCR ambiguities in the equality chain; verify the glyphs against a high-resolution scan before implementing a production parser.
