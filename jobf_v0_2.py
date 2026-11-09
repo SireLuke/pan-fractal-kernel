@@ -182,7 +182,7 @@ def plot_diagnostics(model, times, directions, rows, snapshots, path):
     fig, axes = plt.subplots(2, 2, figsize=(14, 10), constrained_layout=True)
     ax = axes[0, 0]
     ax.plot(times, [r["mean_radius"] for r in rows], label="deformed boundary")
-    ax.plot(times, [r["baseline_mean_radius"] for r in rows], "--", label="H8 baseline")
+    ax.plot(times, [r["baseline_mean_radius"] for r in rows], "--", label="Gosset 4_21 baseline")
     ax.set(title="Whole-domain breathing", xlabel="model time", ylabel="mean radius")
     ax.legend()
     ax = axes[0, 1]
