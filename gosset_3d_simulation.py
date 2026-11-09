@@ -21,10 +21,12 @@ from matplotlib.animation import FuncAnimation
 try:
     from .gosset_421 import E8_ROOTS
     from .gosset_projection import ProjectionFrame, project_points
+    from .view_ladder import gosset_seeded_ladder
     from .jobf_v0_2 import JanusOctadialBreathingField
 except ImportError:
     from gosset_421 import E8_ROOTS
     from gosset_projection import ProjectionFrame, project_points
+    from view_ladder import gosset_seeded_ladder
     from jobf_v0_2 import JanusOctadialBreathingField
 
 KEYS = ("h", "R", "u", "d", "tau", "chi", "s", "f")
@@ -124,6 +126,7 @@ def _metadata(frame, seed, dt, shape_bias):
         "shape_bias": shape_bias,
         "metrics_scope": "3D projected hull volume, not 8D polytope volume",
         "source_indices": list(range(len(E8_ROOTS))),
+        "view_ladder": gosset_seeded_ladder(seed).to_schema(),
     }
 
 

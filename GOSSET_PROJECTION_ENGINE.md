@@ -60,3 +60,6 @@ reconstruction error, lossless identity transforms, the 8D->4D->3D->2D
 ladder, root identity, canonical adjacency indexing, and stable V8 labels.
 Passing tests validates this software transform contract, not a physical
 interpretation of E8 or PAN V8.
+
+See `VIEW_LADDER_SCHEMA.md` for the schema that unifies this ladder with the seeded 3D view and
+adds finite 5_21 / affine-E8 patches.
