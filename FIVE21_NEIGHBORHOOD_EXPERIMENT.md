@@ -1,93 +1,94 @@
-# 5_21 neighborhood-engine experiment and 11D spatial R^10 clarification
+# 5_21 neighborhood-engine experiment and R10 clarification
 
 **Date:** 2026-11-09
-**Research branch:** research/m-theory-11d-5_21-integration
-**Canonical semantic baseline:** JANUS-HYDRA-DYNAMIC-INVERSE-v1 (unchanged)
-**Execution:** Independent local Python experiment; repository pytest/CI not executed.
-**Repository state:** Documentation-only addition; no production code or canonical files changed.
+**Branch:** research/m-theory-11d-5_21-integration
+**Baseline:** JANUS-HYDRA-DYNAMIC-INVERSE-v1 unchanged.
+**Execution:** Independent local Python calculations; repository pytest/CI not executed.
+**Repository changes:** Documentation only.
 
-## 1. Clarifying R^10 in the 11D discussion
+## 1. Two distinct R^10 constructions
 
-The standard Lorentzian 11D spacetime notation is M^(1,10), locally modeled in the flat case by R^(1,10): one time direction and ten spatial directions. A constant-time spatial slice is therefore R^10 (or a curved 10D spatial manifold in a general background).
+### M-theory spatial slice
+In the usual Lorentzian 11D description, spacetime is locally R^(1,10): one time and ten spatial directions. A constant-time flat spatial slice is R^10 (general backgrounds may have curved spatial slices).
 
-This is distinct from the PAN V8 coordinate R, which remains the radial/boundary feature in V8=(h,R,u,d,tau,chi,s,f). Do not rename that semantic coordinate R10.
+### Du Val / Coxeter 5_21 coordinates
+Coxeter's “Regular and Semi-Regular Polytopes III” (Math. Z. 200, 1988, pp. 3–45) records Du Val's ten-coordinate realization of the same 5_21 lattice in Euclidean R^10. The coordinates obey two independent linear constraints:
+- x1+x2+x3+x4+x5 = 0
+- x6+x7+x8+x9+x10 = 0
 
-The E8 lattice and 5_21 honeycomb live in Euclidean R^8. An abstract linear isometric embedding R^8 -> R^10 exists, with a two-dimensional orthogonal complement, but choosing such an embedding is not a physical compactification. A physical M-theory compactification requires a specified metric, topology, field ansatz, and equations. No preferred R^8 x R^2 decomposition is assumed here.
+These constraints leave an 8-dimensional linear subspace. Congruence conditions modulo 5 then select the lattice points. This is a constrained ten-coordinate representation of an 8D Euclidean lattice, not a ten-dimensional 5_21 honeycomb.
 
-## 2. Local 5_21 / Gosset neighborhood experiment
+The numerical coincidence with M-theory's ten spatial directions is intriguing as a representation question, but it does not identify the two spaces physically. Keep typed objects separate:
+- M-theory spatial tangent space: dimension 10, equipped with the physical spatial metric/background.
+- Du Val coordinate ambient space: Euclidean R^10 with two linear constraints, whose allowed subspace is dimension 8.
+- V8 semantic coordinate R: remains the existing radial/boundary semantic feature; do not rename it R10.
 
-Constructed the canonical 240 E8 roots:
-- 112 integral roots with exactly two nonzero coordinates ±1;
-- 128 half-integral roots with coordinates ±1/2 and even minus-sign parity.
+A physical map would require an explicitly declared metric-compatible embedding and field/compactification ansatz. No such physical identification is assumed.
 
-Then constructed local neighborhoods around two adjacent E8 lattice vertices:
-- center p = 0;
-- center q = alpha, where alpha is one E8 root (so ||q-p||^2 = 2).
+## 2. Local 5_21 / Gosset neighborhood calculation
 
-For any lattice vertex p, its nearest lattice neighbors are p + Phi, where Phi is the 240-root set. This is the local vertex set of the 5_21 honeycomb. The induced local vertex figure is Gosset 4_21.
+Constructed the canonical E8 roots:
+- 112 integral roots with exactly two nonzero entries ±1;
+- 128 half-integral roots with all entries ±1/2 and even minus-sign parity.
 
-### Computed results
+Let Phi be the 240 roots. For a lattice vertex p, its nearest neighbors are p+Phi. For adjacent centers p=0 and q=alpha, where alpha is a root, the independent calculation returned:
 
 | Invariant | Result |
 |---|---:|
 | E8 roots | 240 |
-| Nearest lattice neighbors per 5_21 vertex | 240 |
-| Vertices in each local 4_21 figure | 240 |
-| Edges in each local 4_21 figure | 6,720 |
-| Local 4_21 degree | 56 at every vertex |
+| Nearest lattice neighbors per center | 240 |
+| Vertices in local Gosset 4_21 figure | 240 |
+| Edges in local Gosset 4_21 graph | 6,720 |
+| Degree of every local vertex | 56 |
 | Squared distance between adjacent centers | 2 |
-| Shared nearest-neighbor vertices of adjacent centers | 56 |
+| Shared nearest neighbors of adjacent centers | 56 |
+| Local incidence after translation to common origin | Identical |
 
-The local edge criterion is inner product 1 between distinct E8 roots, equivalent to squared distance 2. The local adjacency edge-index set is identical at both centers after translating each neighborhood back to its center. This verifies that the local Gosset vertex figures are translationally congruent.
+The local adjacency condition is inner product 1 between distinct roots, equivalently squared distance 2. A shared neighbor beta of centers 0 and alpha requires both beta and beta-alpha to be roots, which gives beta·alpha=1. There are exactly 56 such roots.
 
-The 56 common neighbors are not accidental: for adjacent centers 0 and alpha, a root beta is shared when beta and beta-alpha are both E8 roots. Since each has squared norm 2, this requires beta·alpha=1, exactly the 56-neighbor relation in the Gosset 4_21 graph.
+This validates the local neighborhood primitive and translation-equivariance of its vertex-figure incidence. It does not yet enumerate every simplex/orthoplex cell and all global 5_21 incidence relations.
 
-### Interpretation
+## 3. Candidate neighborhood engine
 
-This gives a concrete neighborhood-engine primitive:
-- lattice vertex p;
-- local neighbors p + Phi;
-- local Gosset adjacency inherited from the 240-root inner-product graph;
-- source vertex/root indices retained as provenance;
-- translation between lattice centers preserves the local vertex-figure incidence structure.
+A separate pure adapter can implement:
+1. exact integer/half-integer lattice coordinate tuples;
+2. 240 nearest-neighbor transitions p -> p+alpha;
+3. stable root labels and edge provenance;
+4. cached local 4_21 figures;
+5. deterministic BFS shells and reversible parent-edge paths;
+6. explicit bounded-depth limits and shell-size/memory reporting.
 
-This is a verified local neighborhood construction, not yet a complete enumerator for all 5_21 cells, facets, or global cell-incidence relations.
+The graph has unbounded depth. Finite BFS runs only establish finite-radius counts and performance; they do not establish a maximum geometric depth.
 
-## 3. Depth and traversal implications
+## 4. Architecture invariants
 
-A next implementation can build a deterministic graph traversal over E8 lattice vertices:
-1. represent each lattice vertex by an exact integer/half-integer coordinate tuple;
-2. enumerate its 240 nearest neighbors by adding the 240 roots;
-3. preserve root labels and edge provenance;
-4. cache local 4_21 vertex figures by lattice vertex;
-5. use canonical ordering to guarantee deterministic replay;
-6. expose bounded BFS shells and reversible parent-edge paths.
+- 5_21: infinite, locally finite 8D Euclidean honeycomb, with affine E8 Weyl symmetry.
+- 4_21: local Gosset vertex figure, 240 roots.
+- 11D M-theory context: 10 spatial dimensions in the flat local Lorentzian model.
+- V8: unchanged (h,R,u,d,tau,chi,s,f), normalized [0,1].
+- Janus Hydra: unchanged five formation/inverse pairs and canonical v1 equations.
+- UHFE/UDFE: separate receivers.
+- No assumption M11 = M8 x B3; no implicit identification of Du Val R10 with physical M-theory spatial R10.
 
-For a bounded traversal, growth must be reported as exact unique lattice vertices per shell, not inferred from a continuous projection. The graph is infinite; a finite run only explores a finite radius.
+## 5. Execution status and next tests
 
-## 4. Geometric depth versus M-theory dimensions
+**Independent calculation passed:** 240 roots, 240 nearest neighbors, 6,720 local edges, uniform degree 56, adjacent-center distance squared 2, 56 shared neighbors, translated local incidence identity.
 
-Keep these independent:
-- E8 lattice depth: unbounded discrete graph traversal in Euclidean R^8.
-- 5_21: infinite, locally finite 8D Euclidean honeycomb.
-- M-theory: 11D Lorentzian spacetime, with a 10D spatial slice in the flat local model.
-- V8: eight normalized semantic coordinates.
-- Janus Hydra: five paired semantic transformations.
-- UHFE/UDFE: separate formation/dissolution receivers.
+**Not run:** repository pytest, GitHub Actions, full global 5_21 cell/facet incidence enumeration, large-radius BFS performance, Coxeter-plane Sierpinski orbit study, 11D supergravity field equations, or physical compactification.
 
-The fact that the 5_21 lattice has unbounded graph depth does not imply extra spacetime dimensions. Conversely, the 11D spacetime dimension does not cap the number of lattice shells or recursive graph levels. These are different notions of dimension and depth.
+Next:
+1. Implement five21_neighborhood.py as a separate adapter.
+2. Add exact-arithmetic tests for all invariants above.
+3. Add bounded BFS shell tests and scaling benchmarks.
+4. Implement the Du Val constrained R10 coordinate conversion and prove equivalence with the canonical E8 lattice representation in R8.
+5. Separately assess whether any physical M-theory background supplies a meaningful map to that constrained coordinate space.
+6. Preserve all canonical Janus v1 tests unchanged.
 
-## 5. Status and next validation gates
+## 6. Sources
 
-**Passed in independent local calculation:** root construction, 240-neighbor count, local 4_21 edge count, uniform degree 56, adjacent-center distance, 56 shared neighbors, translational congruence of local incidence.
+- Coxeter, “Regular and Semi-Regular Polytopes III,” Math. Z. 200 (1988), 3–45: https://roice3.org/ruen/Regular_and_Semi-Regular_Polytopes_III.pdf
+- E8 lattice and 5_21 relation: https://en.wikipedia.org/wiki/E8_lattice
+- 5_21 honeycomb structure and 4_21 vertex figure: https://en.wikipedia.org/wiki/5_21_honeycomb
+- 11D supergravity and hidden symmetries: https://arxiv.org/abs/2303.12682
 
-**Not run:** repository pytest, GitHub Actions, full 5_21 cell/facet incidence enumeration, a large-radius BFS benchmark, the 72 Coxeter-plane Sierpinski seed experiment, 11D supergravity field equations, compactification, or a physical R^8-to-R^10 embedding.
-
-Recommended next steps:
-1. Implement a pure, exact-arithmetic five21_neighborhood.py adapter without modifying gosset_421.py or Janus v1.
-2. Add tests for 240 nearest neighbors, 56 shared neighbors for adjacent centers, 6,720 local Gosset edges, translation equivariance, and deterministic BFS.
-3. Enumerate finite BFS shells and report unique-vertex counts and memory/time scaling.
-4. Separately revisit the 72 Coxeter-plane Sierpinski seeds, distinguishing orbit-invariant recursion from projection artifacts.
-5. Keep any R^8-to-R^10 embedding as a separately declared geometric adapter; do not call it a compactification absent a physical ansatz.
-
-**Scientific caution:** These are exact lattice/polytope combinatorics. They do not demonstrate an M-theory vacuum, a physical extra-dimensional geometry, or a physical interpretation of Janus pair defects.
+**Scientific status:** Exact combinatorial lattice calculations and established coordinate representation facts. No physical identification with M-theory's ten spatial dimensions is claimed.
