@@ -118,3 +118,16 @@ No symmetry adapter may rewrite V8 values, alter Janus equations, or impose UHFE
 - M-theory and the 11th dimension overview: https://www.sciencedirect.com/science/article/pii/S0370157399000162
 
 **Scientific status:** This document records established mathematical relationships alongside explicitly labeled research hypotheses and software architecture proposals. It does not claim that PAN, Janus Hydra, E8 geometry, or the SU(9)/SU(10) experiments derive or validate M-theory.
+
+## 9. Important R^10 coordinate realization of 5_21
+
+A further exact bridge must be recorded: Coxeter's discussion of Du Val coordinates gives a ten-coordinate realization of the same 5_21 lattice inside Euclidean R^10. The coordinates obey two independent linear constraints,
+
+x1+x2+x3+x4+x5 = 0,
+x6+x7+x8+x9+x10 = 0,
+
+so the allowed linear subspace has dimension 8, not 10. Additional congruence conditions modulo 5 select the lattice points. Thus this is a redundant/constrained 10-coordinate realization of an 8-dimensional Euclidean lattice, not a 10-dimensional 5_21 honeycomb.
+
+This is a particularly useful representation to investigate alongside M-theory, because flat 11D spacetime has ten spatial directions (R^10 on a constant-time slice). However, the shared number ten does not identify the Du Val coordinate space with M-theory's physical spatial slice. A physical identification would require a metric-compatible embedding plus a theory-specific field/compactification ansatz. Keep the two R^10 spaces as distinct typed objects until such a map is explicitly constructed.
+
+Reference: H. S. M. Coxeter, “Regular and Semi-Regular Polytopes III,” Mathematical Zeitschrift 200 (1988), pp. 3–45, discussion of Du Val's ten-dimensional coordinates for 5_21. The two sum constraints reduce the coordinate subspace to dimension eight; the congruences specify the lattice within it.
