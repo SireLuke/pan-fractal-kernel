@@ -8,7 +8,7 @@
 - The affine E8 Weyl group is W(E8) semidirect E8-lattice translations. A lattice translation maps the full E8 lattice to itself; it does not map the finite 240-root subset onto itself.
 - V9 is represented experimentally as (V8, xi), with xi in [0,1] controlling a continuous orthogonal display-frame family.
 - xi is not asserted to be a ninth Euclidean root coordinate or an affine null-root coordinate.
-- Janus Hydra remains the semantic translator. UHFE and UDFE remain separate formation and dissolution outputs.
+- Janus Hydra remains the semantic translator. UHFE and UDFE remain separate formation and decoherence outputs.
 - V8 order remains (h, R, u, d, tau, chi, s, f). No geometry-view operation mutates V8 or semantic records.
 
 ## Implemented view construction
@@ -41,7 +41,7 @@ not a Weyl-group action.
 ## Janus v1 compatibility gate
 
 JANUS-HYDRA-DYNAMIC-INVERSE-v1 is the canonical semantic baseline. All five
-inverse heads include dissolution density d, and the reader has separate
+inverse heads include decoherence density d, and the reader has separate
 formation and inverse support maps. The five pair defects are regression
 tested. V9 view traversal is not connected to, and cannot modify, the V8
 semantic input.
