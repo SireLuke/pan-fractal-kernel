@@ -8,7 +8,7 @@
 
 Use Coxeter notation **5_21** (both indices are subscripts), not 5^21.
 
-- **5_21** is an 8-dimensional Euclidean honeycomb whose vertex arrangement is the E8 lattice. Its affine Weyl symmetry is the affine extension E9.
+- **5_21** is an 8-dimensional Euclidean honeycomb whose vertex arrangement is the E8 lattice. Its symmetry group is the affine Weyl group W_aff(E8), associated with the affine Kac-Moody algebra E9.
 - **4_21** is the Gosset polytope and the vertex figure of 5_21. It remains the canonical local 8D convex geometry used by the PAN/JOBF implementation.
 - **M-theory spacetime** is 11-dimensional (one time and ten spatial dimensions in the usual Lorentzian description). Denote its coordinates abstractly by X^M, M=0,...,10.
 - **V8** remains the eight-component semantic state, in the exact order (h, R, u, d, tau, chi, s, f). It is not the coordinate chart of 11D spacetime.
@@ -52,7 +52,7 @@ Keep the following as a theory-reference registry, not as a claim that every gro
 |---|---|
 | 10D IIA | O(1,1) |
 | 10D IIB | SL(2,R) |
-| 9D | GL(2,R) |
+| 9D | SL(2,R) x R+ (often locally described as GL(2,R)) |
 | 8D | SL(2,R) x SL(3,R) |
 | 7D | SL(5,R) |
 | 6D | SO(5,5) |
