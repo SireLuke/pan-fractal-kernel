@@ -116,3 +116,55 @@ def test_inverse_cartan_diagonal_reproduces_reported_values():
     diag = sorted(int(2 * M[i][n + i]) for i in range(n))        # Gram = Cartan/2 -> inverse = 2 * inverse Cartan
     assert diag == sorted([-84, -60, -40, -24, -12, -4, 0, -36, -8, -20])
     assert sum(d == 0 for d in diag) == 1 and sum(d < 0 for d in diag) == 9
+
+
+# ---------------------------------------------------------------- root multiplicities (Peterson recursion)
+def _p8(k):
+    """8-coloured partition numbers: coefficient of q^k in prod (1-q^n)^-8 (1, 8, 44, 192, ...)."""
+    p = [1] + [0] * k
+    for part in range(1, k + 1):
+        for _ in range(8):
+            for j in range(part, k + 1): p[j] += p[j - part]
+    return p[k]
+
+
+def _by_norm(n, H):
+    A = km.cartan_en(n)
+    m = km.peterson_multiplicities(n, H)
+    out = {}
+    for b, v in m.items():
+        out.setdefault(km._bilinear(A, b, b), set()).add(v)
+    return m, out
+
+
+def test_e8_has_120_positive_roots_all_simple_multiplicity():
+    m = km.peterson_multiplicities(8, 29)
+    assert len(m) == 120 and set(m.values()) == {1}
+
+
+def test_e9_imaginary_roots_have_multiplicity_8_and_real_roots_1():
+    m = km.peterson_multiplicities(9, 62)
+    delta = tuple(km.kernel_vector(km.cartan_en(9)))
+    two_delta = tuple(2 * x for x in delta)
+    assert m[delta] == 8 and m[two_delta] == 8              # rank of the finite E8 part
+    assert all(v == 1 for b, v in m.items() if b not in (delta, two_delta))
+    assert sum(1 for v in m.values() if v == 8) == 2
+
+
+def test_e10_multiplicity_depends_only_on_norm_here_and_equals_p8():
+    m, by = _by_norm(10, 64)
+    assert by == {2: {1}, 0: {8}, -2: {44}}
+    assert [1, 8, 44] == [_p8(k) for k in (0, 1, 2)]       # mult = p_8(1 - norm/2) at norms 2, 0, -2
+
+
+def test_e11_first_imaginary_roots_and_deviation_from_e10():
+    m, by = _by_norm(11, 48)
+    assert by[2] == {1} and by[0] == {8}
+    assert by[-2] == {46}                                  # computed; E10 has 44 here -- E11 is not a function of E10's rule
+    A = km.cartan_en(11)
+    assert min(sum(b) for b in m if km._bilinear(A, b, b) == -2) == 47
+
+
+def test_weyl_kac_denominator_identity_validates_the_recursion():
+    for n, H in ((8, 12), (9, 12), (10, 10), (11, 8)):
+        assert km.denominator_identity_holds(n, H), (n, H)
