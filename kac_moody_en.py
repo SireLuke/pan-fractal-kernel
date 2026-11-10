@@ -185,3 +185,22 @@ def weight_reflection(x2, alpha2, n):
 def affine_reflection_via_roots(x2, alpha2, k):
     """five21_neighborhood.affine_reflection but implemented through the Kac-Moody root alpha - k*delta."""
     return weight_reflection(x2, alpha2, -k)
+
+
+# ---------------------------------------------------------------- E10 root lattice = E8 (+) U (explicit isometry)
+def e10_basis_change():
+    """Integer matrix B (rows = new basis in simple-root coordinates) with B A B^T = E8 (+) U, det B = +-1.
+
+    New basis: a_1..a_8, delta = sum(marks_i a_i) + a_9 (null, orthogonal to a_1..a_8), f = -a_10 - delta
+    (null, f.delta = 1, f.a_i = 0 for i <= 8). Node numbering as cartan_en(10).
+    """
+    marks = [2, 3, 4, 6, 5, 4, 3, 2, 1]
+    rows = [[int(i == j) for j in range(10)] for i in range(8)]
+    delta = marks + [0]
+    f = [-d for d in delta]; f[9] -= 1
+    return rows + [delta, f]
+
+
+def gram_of(B, A):
+    n = len(A)
+    return [[sum(B[i][a] * A[a][b] * B[j][b] for a in range(n) for b in range(n)) for j in range(len(B))] for i in range(len(B))]

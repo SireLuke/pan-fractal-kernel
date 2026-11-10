@@ -90,3 +90,29 @@ def test_e9_real_roots_never_saturate_and_grow_linearly():
     assert all(x > 0 for x in steps)                        # affine: infinitely many real roots
     assert set(steps[1:]) <= {16, 17}                       # linear growth (about 16.6 per reflection depth), no saturation
     assert c[-1] > 240
+
+
+def test_e10_root_lattice_is_explicitly_e8_plus_hyperbolic_plane():
+    B = km.e10_basis_change()
+    G = km.gram_of(B, km.cartan_en(10))
+    E8 = km.cartan_en(8)
+    for i in range(10):
+        for j in range(10):
+            want = E8[i][j] if i < 8 and j < 8 else (1 if {i, j} == {8, 9} else 0)
+            assert G[i][j] == want
+    assert abs(km.inertia_det([list(map(Fraction, r)) for r in B])[3]) == 1      # unimodular change of basis
+
+
+def test_inverse_cartan_diagonal_reproduces_reported_values():
+    n = 10
+    A = [[Fraction(x) for x in r] for r in km.cartan_en(n)]
+    M = [r[:] + [Fraction(int(i == j)) for j in range(n)] for i, r in enumerate(A)]
+    for c in range(n):
+        p = next(r for r in range(c, n) if M[r][c] != 0); M[c], M[p] = M[p], M[c]
+        M[c] = [x / M[c][c] for x in M[c]]
+        for r in range(n):
+            if r != c and M[r][c] != 0:
+                f = M[r][c]; M[r] = [x - f * y for x, y in zip(M[r], M[c])]
+    diag = sorted(int(2 * M[i][n + i]) for i in range(n))        # Gram = Cartan/2 -> inverse = 2 * inverse Cartan
+    assert diag == sorted([-84, -60, -40, -24, -12, -4, 0, -36, -8, -20])
+    assert sum(d == 0 for d in diag) == 1 and sum(d < 0 for d in diag) == 9
