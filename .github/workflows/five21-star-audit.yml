@@ -1,0 +1,19 @@
+name: five21-star-audit
+on:
+  pull_request:
+  push:
+    branches-ignore: [main]
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: python -m pip install numpy pytest
+      - name: Exact 5_21 star audit (prints full result)
+        run: python five21_star.py | tee star_audit.json
+      - name: Tests
+        run: python -m pytest -q tests/test_five21_star.py tests/test_view_ladder.py
+      - uses: actions/upload-artifact@v4
+        with: { name: star-audit, path: star_audit.json }
