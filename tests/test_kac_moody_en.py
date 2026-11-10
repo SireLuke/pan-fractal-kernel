@@ -85,7 +85,8 @@ def test_e8_root_growth_saturates_at_240():
 
 
 def test_e9_real_roots_never_saturate_and_grow_linearly():
-    c = km.root_growth(9, 14)
+    c = km.root_growth(9, 24)
     steps = [b - a for a, b in zip(c, c[1:])]
     assert all(x > 0 for x in steps)                        # affine: infinitely many real roots
-    assert len(set(steps[-4:])) == 1                        # constant increment once past the transient
+    assert set(steps[1:]) <= {16, 17}                       # linear growth (about 16.6 per reflection depth), no saturation
+    assert c[-1] > 240
