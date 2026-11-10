@@ -71,3 +71,11 @@ def test_depth_three_matches_reference_shell_count():
     assert result.visited_vertices == 131041
     assert result.reached_depth == 3
     assert not result.truncated
+
+def test_depth_four_matches_reference_shell_count():
+    # Near the default vertex cap: this is an intentional integration benchmark.
+    result = explore(4, max_vertices=1_000_000)
+    assert result.shell_counts() == (1, 240, 9120, 121680, 864960)
+    assert result.visited_vertices == 996001
+    assert result.reached_depth == 4
+    assert not result.truncated
