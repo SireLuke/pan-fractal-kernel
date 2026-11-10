@@ -204,3 +204,112 @@ def e10_basis_change():
 def gram_of(B, A):
     n = len(A)
     return [[sum(B[i][a] * A[a][b] * B[j][b] for a in range(n) for b in range(n)) for j in range(len(B))] for i in range(len(B))]
+
+
+# ---------------------------------------------------------------- root multiplicities (Peterson) + denominator check
+def _bilinear(A, u, v):
+    n = len(A)
+    return sum(u[i] * A[i][j] * v[j] for i in range(n) for j in range(n) if u[i] and v[j])
+
+
+def positive_real_roots(n: int, max_height: int):
+    """All positive real roots of height <= max_height, by the exact rule beta = s_i(gamma), gamma lower, (gamma|a_i) < 0."""
+    A = cartan_en(n)
+    by_h = {1: [tuple(int(i == j) for j in range(n)) for i in range(n)]}
+    seen = set(by_h[1])
+    for h in range(2, max_height + 1):
+        cur = []
+        for g in by_h.get(h - 1, []) if False else [r for hh in range(1, h) for r in by_h.get(hh, [])]:
+            for i in range(n):
+                ip = sum(A[i][j] * g[j] for j in range(n))
+                if ip < 0 and sum(g) - ip == h:
+                    r = list(g); r[i] -= ip; r = tuple(r)
+                    if r not in seen: seen.add(r); cur.append(r)
+        by_h[h] = cur
+    return seen
+
+
+def peterson_multiplicities(n: int, max_height: int):
+    """Multiplicities of all positive roots of E_n up to `max_height` (simple-root integer coordinates).
+
+    Peterson: (b|b-2rho) c(b) = sum_{b'+b''=b} (b'|b'') c(b') c(b''),  c(b) = sum_{k>=1} mult(b/k)/k,
+    with (b|2rho) = 2 ht(b) (simply laced). The coefficient vanishes at k*beta for a real root beta of height k,
+    so real roots (mult 1) and their multiples (c = 1/k) are seeded directly; the recursion decides the rest.
+    Exact Fractions; only nonzero c are stored.
+    """
+    from math import gcd
+    A = cartan_en(n)
+    real = positive_real_roots(n, max_height)
+    c = {}
+    by_h = {h: [] for h in range(1, max_height + 1)}
+    for r in real:
+        for k in range(1, max_height // sum(r) + 1):
+            v = tuple(k * x for x in r)
+            c[v] = Fraction(1, k); by_h[sum(v)].append(v)
+    real_multiples = set(c)
+    mult = {r: 1 for r in real}
+    for h in range(2, max_height + 1):
+        acc = {}
+        for h1 in range(1, h // 2 + 1):
+            for b1 in by_h[h1]:
+                for b2 in by_h[h - h1]:
+                    ip = _bilinear(A, b1, b2)
+                    if ip == 0: continue
+                    b = tuple(x + y for x, y in zip(b1, b2))
+                    if b in real_multiples: continue
+                    acc[b] = acc.get(b, 0) + ip * c[b1] * c[b2] * (2 if h1 < h - h1 else 1)
+        for b, total in acc.items():
+            if total == 0: continue
+            coef = _bilinear(A, b, b) - 2 * h
+            if coef == 0: raise ArithmeticError(f"nonzero Peterson sum with zero coefficient at {b}")
+            cb = Fraction(total) / coef
+            c[b] = cb; by_h[h].append(b)
+            g = 0
+            for x in b: g = gcd(g, x)
+            m = cb
+            for k in range(2, g + 1):
+                if g % k == 0:
+                    m -= Fraction(mult.get(tuple(x // k for x in b), 0), k)
+            if m.denominator != 1 or m < 0: raise ArithmeticError(f"non-integer/negative multiplicity {m} at {b}")
+            if m != 0: mult[b] = int(m)
+    return {b: m for b, m in mult.items() if m}
+
+
+def weyl_denominator_terms(n: int, max_height: int):
+    """{mu: sign} for sum_w sign(w) e^{w rho - rho} = sum sign * x^{rho - w rho}, truncated at height <= max_height."""
+    A = cartan_en(n)
+    start = tuple([0] * n)
+    terms = {start: 1}
+    frontier = [start]
+    while frontier:
+        nxt = []
+        for mu in frontier:
+            for i in range(n):
+                cc = 1 - sum(A[j][i] * mu[j] for j in range(n))        # <w rho, alpha_i^vee>
+                if cc > 0 and sum(mu) + cc <= max_height:
+                    new = list(mu); new[i] += cc; new = tuple(new)
+                    if new not in terms:
+                        terms[new] = -terms[mu]; nxt.append(new)
+        frontier = nxt
+    return {m: s for m, s in terms.items()}
+
+
+def denominator_identity_holds(n: int, max_height: int, mult=None) -> bool:
+    """Check prod_{b>0} (1 - x^b)^{mult(b)} == sum_w sign(w) x^{rho-w rho} through height max_height."""
+    from math import comb
+    mult = peterson_multiplicities(n, max_height) if mult is None else mult
+    series = {tuple([0] * n): 1}
+    for b, m in sorted(mult.items(), key=lambda kv: sum(kv[0])):
+        hb = sum(b)
+        new = dict(series)
+        for k in range(1, max_height // hb + 1):
+            coef = (-1) ** k * comb(m, k)
+            if coef == 0: continue
+            sh = tuple(k * x for x in b)
+            for mono, v in series.items():
+                if sum(mono) + k * hb <= max_height:
+                    key = tuple(x + y for x, y in zip(mono, sh))
+                    new[key] = new.get(key, 0) + coef * v
+        series = {k: v for k, v in new.items() if v}
+    rhs = {k: v for k, v in weyl_denominator_terms(n, max_height).items()}
+    return series == rhs
