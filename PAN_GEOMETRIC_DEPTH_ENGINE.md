@@ -40,7 +40,7 @@ If the vertex budget would be exceeded, the engine discards the incomplete next 
 | 3 | 121,680 | 131,041 |
 | 4 | 864,960 | 996,001 |
 
-CI initially pins depths 0–2 to keep execution bounded. Depth 3 and 4 are benchmark targets, not CI assumptions. The depth-4 digest from the exploratory run must be compared only after matching this engine's canonical serialization.
+CI pins depths 0–3 to exercise a nontrivial frontier while keeping execution bounded. Depth 4 remains a benchmark target, not a CI assumption. The depth-4 digest from the exploratory run must be compared only after matching this engine's canonical serialization.
 
 ## View Ladder integration boundary
 
