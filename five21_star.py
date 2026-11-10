@@ -88,6 +88,32 @@ def delaunay_check(cells, radius2_times_81):
     return bad_eq, bad_in
 
 
+def tiling_density(simp=None, orth=None):
+    """Exact volume of all Delaunay cells per lattice vertex; must equal the E8 covolume 1 if the cells tile.
+
+    A vertex lies in 17280 simplex cells (9 vertices each) and 2160 orthoplex cells (16 vertices each), so
+    each lattice point owns 17280/9 simplices and 2160/16 orthoplices. Regular 8-simplex of squared edge e:
+    V = (e^4/8!) * sqrt(9/2^8) = e^4 * 3 / (16 * 8!). Orthoplex of circumradius r: V = 2^8 r^8 / 8!.
+    """
+    from fractions import Fraction
+    from math import factorial
+    simp = simplex_cells_at_origin() if simp is None else simp
+    orth = orthoplex_cells_at_origin() if orth is None else orth
+    c = next(iter(simp)); p = sorted(c)
+    e2 = {sum((a - b) ** 2 for a, b in zip(p[i], p[j])) / 4 for i in range(9) for j in range(i + 1, 9)}
+    assert e2 == {2.0}                                   # squared edge 2
+    o = sorted(next(iter(orth)))
+    ctr = tuple(sum(q[k] for q in o) / 16 for k in range(8))
+    r2 = {sum((q[k] - ctr[k]) ** 2 for k in range(8)) / 4 for q in o}
+    assert r2 == {1.0}                                   # circumradius 1
+    f8 = factorial(8)
+    v_simplex = Fraction(2 ** 4 * 3, 16 * f8)
+    v_orth = Fraction(2 ** 8, f8)
+    n_simplex = Fraction(len(simp), 9); n_orth = Fraction(len(orth), 16)
+    return {"simplices_per_vertex": n_simplex, "orthoplices_per_vertex": n_orth,
+            "volume_per_vertex": n_simplex * v_simplex + n_orth * v_orth}
+
+
 def audit() -> dict:
     simp, orth = simplex_cells_at_origin(), orthoplex_cells_at_origin()
     res = {"simplex_cells": len(simp), "orthoplex_cells": len(orth)}

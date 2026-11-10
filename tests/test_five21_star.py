@@ -36,3 +36,9 @@ def test_translation_propagation_to_neighbouring_stars(res):
 def test_every_ridge_of_every_origin_cell_lies_in_exactly_two_cells(res):
     assert res["ridges_in_origin_cells"] == 501_120
     assert res["ridges_not_in_exactly_two_cells"] == 0
+
+
+def test_cells_tile_space_with_exact_unit_density():
+    d = st.tiling_density()
+    assert d["simplices_per_vertex"] == 1920 and d["orthoplices_per_vertex"] == 135
+    assert d["volume_per_vertex"] == 1                    # E8 covolume: no gaps, no net overlap
