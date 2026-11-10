@@ -64,3 +64,10 @@ def test_rejects_invalid_depth(depth):
 def test_rejects_non_lattice_origin():
     with pytest.raises(ValueError):
         explore(1, origin=(1, 1, 1, 1, 1, 1, 1, 0))
+
+def test_depth_three_matches_reference_shell_count():
+    result = explore(3, max_vertices=150000)
+    assert result.shell_counts() == (1, 240, 9120, 121680)
+    assert result.visited_vertices == 131041
+    assert result.reached_depth == 3
+    assert not result.truncated
