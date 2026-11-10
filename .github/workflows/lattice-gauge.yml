@@ -8,6 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }     # full history: a shallow clone hides the parents of GitHub's synthetic merge commit
       - uses: actions/setup-python@v5
         with: { python-version: "3.11" }
       - run: pip install numpy scipy
@@ -19,5 +20,5 @@ jobs:
         if: github.event_name == 'pull_request'
         run: |
           git fetch origin ${{ github.base_ref }}
-          bad=$(git log --no-merges --format='%H' origin/${{ github.base_ref }}..HEAD | while read c; do git show -s --format=%B $c | grep -q '^Signed-off-by:' || echo $c; done)
+          bad=$(git log --no-merges --format='%H' origin/${{ github.base_ref }}..${{ github.event.pull_request.head.sha }} | while read c; do git show -s --format=%B $c | grep -q '^Signed-off-by:' || echo $c; done)
           test -z "$bad" || { echo "Missing Signed-off-by on: $bad"; exit 1; }
