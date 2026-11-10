@@ -64,3 +64,7 @@ Existing five21_neighborhood.five21_ladder builds views from **Euclidean norm sh
 6. Obtain independent mathematical review before manuscript submission.
 
 No physical law, new particle model, or experimental prediction is claimed.
+
+## CI record
+
+The focused GitHub Actions workflow passed on commit `050e158ec6a8000a2a7c1fa437839e672f765de6` (run [42751759913](https://github.com/SireLuke/pan-fractal-kernel/actions/runs/42751759913)). It executes the depth-engine tests through graph depth 3, plus the existing View Ladder and Du Val E8 tests. This is focused CI evidence, not a full-repository test run and not an execution of the depth-4 benchmark.
