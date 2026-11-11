@@ -1,0 +1,170 @@
+{
+ "preregistered_factor": 0.25,
+ "halpha": {
+  "lambda_rydberg_m": 6.564696063498423e-07,
+  "lambda_from_bohr_levels_m": 6.564696063498423e-07,
+  "relative_difference": 0.0
+ },
+ "planck_length_m": 1.6162550244237053e-35,
+ "results": [
+  {
+   "rule": "mean_radius",
+   "shell": 1,
+   "points": 240,
+   "scale_a0_per_unit": 2.5788396636931736,
+   "bookkeeping": {
+    "a0_per_lattice_unit": 1.8235150137902787,
+    "metres_per_lattice_unit": 9.649625883826433e-11,
+    "planck_lengths_per_lattice_unit": 5.97036095047384e+24,
+    "note": "unit conversion only; asserts no minimum length or physical lattice size"
+   },
+   "e8": null,
+   "null_min": null,
+   "null_median": null,
+   "passes": null,
+   "note": "single state; cross-(l,m) overlap undefined"
+  },
+  {
+   "rule": "mean_radius",
+   "shell": 2,
+   "points": 2160,
+   "scale_a0_per_unit": 10.304279721170357,
+   "bookkeeping": {
+    "a0_per_lattice_unit": 5.152139860585178,
+    "metres_per_lattice_unit": 2.7263949997570177e-10,
+    "planck_lengths_per_lattice_unit": 1.6868594117621666e+25,
+    "note": "unit conversion only; asserts no minimum length or physical lattice size"
+   },
+   "e8": 0.017573268462185095,
+   "null_min": 0.01991709594954442,
+   "null_median": 0.05465235817768284,
+   "null_trials": 200,
+   "ratio_to_null_min": 0.8823208216048717,
+   "passes": false
+  },
+  {
+   "rule": "mean_radius",
+   "shell": 3,
+   "points": 6720,
+   "scale_a0_per_unit": 23.19753262382973,
+   "bookkeeping": {
+    "a0_per_lattice_unit": 9.470353036658178,
+    "metres_per_lattice_unit": 5.011495002805674e-10,
+    "planck_lengths_per_lattice_unit": 3.100683324769605e+25,
+    "note": "unit conversion only; asserts no minimum length or physical lattice size"
+   },
+   "e8": 0.06589032337020738,
+   "null_min": 0.04064170583400765,
+   "null_median": 0.08459223230396815,
+   "null_trials": 200,
+   "ratio_to_null_min": 1.6212489613335206,
+   "passes": false
+  },
+  {
+   "rule": "max_radius",
+   "shell": 1,
+   "points": 240,
+   "scale_a0_per_unit": 2.085449874405882,
+   "bookkeeping": {
+    "a0_per_lattice_unit": 1.474635748017033,
+    "metres_per_lattice_unit": 7.803436317041183e-11,
+    "planck_lengths_per_lattice_unit": 4.8280971747163415e+24,
+    "note": "unit conversion only; asserts no minimum length or physical lattice size"
+   },
+   "e8": null,
+   "null_min": null,
+   "null_median": null,
+   "passes": null,
+   "note": "single state; cross-(l,m) overlap undefined"
+  },
+  {
+   "rule": "max_radius",
+   "shell": 2,
+   "points": 2160,
+   "scale_a0_per_unit": 8.144004078553678,
+   "bookkeeping": {
+    "a0_per_lattice_unit": 4.072002039276839,
+    "metres_per_lattice_unit": 2.154810680473997e-10,
+    "planck_lengths_per_lattice_unit": 1.3332120537365817e+25,
+    "note": "unit conversion only; asserts no minimum length or physical lattice size"
+   },
+   "e8": 0.011255945178702991,
+   "null_min": 0.014128948325034139,
+   "null_median": 0.044381458501710117,
+   "null_trials": 200,
+   "ratio_to_null_min": 0.7966583867221975,
+   "passes": false
+  },
+  {
+   "rule": "max_radius",
+   "shell": 3,
+   "points": 6720,
+   "scale_a0_per_unit": 18.2613889622892,
+   "bookkeeping": {
+    "a0_per_lattice_unit": 7.455180825350224,
+    "metres_per_lattice_unit": 3.9451117932599473e-10,
+    "planck_lengths_per_lattice_unit": 2.4408968471214022e+25,
+    "note": "unit conversion only; asserts no minimum length or physical lattice size"
+   },
+   "e8": 0.04792439076762084,
+   "null_min": 0.030290633454129676,
+   "null_median": 0.05908990421632036,
+   "null_trials": 200,
+   "ratio_to_null_min": 1.5821521474681166,
+   "passes": false
+  },
+  {
+   "rule": "lattice_unit",
+   "shell": 1,
+   "points": 240,
+   "scale_a0_per_unit": 1.4142135623730951,
+   "bookkeeping": {
+    "a0_per_lattice_unit": 1.0,
+    "metres_per_lattice_unit": 5.29177210544e-11,
+    "planck_lengths_per_lattice_unit": 3.27409475947451e+24,
+    "note": "unit conversion only; asserts no minimum length or physical lattice size"
+   },
+   "e8": null,
+   "null_min": null,
+   "null_median": null,
+   "passes": null,
+   "note": "single state; cross-(l,m) overlap undefined"
+  },
+  {
+   "rule": "lattice_unit",
+   "shell": 2,
+   "points": 2160,
+   "scale_a0_per_unit": 2.0,
+   "bookkeeping": {
+    "a0_per_lattice_unit": 1.0,
+    "metres_per_lattice_unit": 5.29177210544e-11,
+    "planck_lengths_per_lattice_unit": 3.27409475947451e+24,
+    "note": "unit conversion only; asserts no minimum length or physical lattice size"
+   },
+   "e8": 0.0005080580711787987,
+   "null_min": 0.00929075604276765,
+   "null_median": 0.031058182122492083,
+   "null_trials": 200,
+   "ratio_to_null_min": 0.054684254848591615,
+   "passes": true
+  },
+  {
+   "rule": "lattice_unit",
+   "shell": 3,
+   "points": 6720,
+   "scale_a0_per_unit": 2.449489742783178,
+   "bookkeeping": {
+    "a0_per_lattice_unit": 1.0,
+    "metres_per_lattice_unit": 5.29177210544e-11,
+    "planck_lengths_per_lattice_unit": 3.27409475947451e+24,
+    "note": "unit conversion only; asserts no minimum length or physical lattice size"
+   },
+   "e8": 0.0011969554840316225,
+   "null_min": 0.018062952217421043,
+   "null_median": 0.030000485717583764,
+   "null_trials": 200,
+   "ratio_to_null_min": 0.06626577259486982,
+   "passes": true
+  }
+ ]
+}
