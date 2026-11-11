@@ -1,0 +1,90 @@
+{
+ "solid_gram_max_error": {
+  "shell1": 2.498001805406602e-16,
+  "shell2": 7.355227538141662e-16,
+  "shell3": 8.049116928532385e-16
+ },
+ "cross_lm_overlap": [
+  {
+   "shell": 1,
+   "points": 240,
+   "length_scale_a0_per_unit": 2.0,
+   "e8": 0.008457121714144268,
+   "null_median": 0.1491302473274051,
+   "null_min": 0.09068767136681823,
+   "fraction_null_le_e8": 0.0
+  },
+  {
+   "shell": 1,
+   "points": 240,
+   "length_scale_a0_per_unit": 6.0,
+   "e8": 0.04436111111129834,
+   "null_median": 0.14579267296413512,
+   "null_min": 0.10623264562416727,
+   "fraction_null_le_e8": 0.0
+  },
+  {
+   "shell": 1,
+   "points": 240,
+   "length_scale_a0_per_unit": 12.0,
+   "e8": 0.10618761564025364,
+   "null_median": 0.2272581933295444,
+   "null_min": 0.13460924472945743,
+   "fraction_null_le_e8": 0.0
+  },
+  {
+   "shell": 2,
+   "points": 2160,
+   "length_scale_a0_per_unit": 2.0,
+   "e8": 0.0014041363529757463,
+   "null_median": 0.058245142793312145,
+   "null_min": 0.035389554528750464,
+   "fraction_null_le_e8": 0.0
+  },
+  {
+   "shell": 2,
+   "points": 2160,
+   "length_scale_a0_per_unit": 6.0,
+   "e8": 0.009582616829763205,
+   "null_median": 0.05221001505898522,
+   "null_min": 0.03618609719204386,
+   "fraction_null_le_e8": 0.0
+  },
+  {
+   "shell": 2,
+   "points": 2160,
+   "length_scale_a0_per_unit": 12.0,
+   "e8": 0.02860356872590956,
+   "null_median": 0.07234421944283863,
+   "null_min": 0.040313474632804026,
+   "fraction_null_le_e8": 0.0
+  },
+  {
+   "shell": 3,
+   "points": 6720,
+   "length_scale_a0_per_unit": 2.0,
+   "e8": 0.000891267534185374,
+   "null_median": 0.028681214649954722,
+   "null_min": 0.02190998977161626,
+   "fraction_null_le_e8": 0.0
+  },
+  {
+   "shell": 3,
+   "points": 6720,
+   "length_scale_a0_per_unit": 6.0,
+   "e8": 0.007063700771652383,
+   "null_median": 0.0268812399059448,
+   "null_min": 0.017274018405254735,
+   "fraction_null_le_e8": 0.0
+  },
+  {
+   "shell": 3,
+   "points": 6720,
+   "length_scale_a0_per_unit": 12.0,
+   "e8": 0.030836918652395445,
+   "null_median": 0.036931252544436494,
+   "null_min": 0.019361132239555982,
+   "fraction_null_le_e8": 0.275
+  }
+ ]
+}
