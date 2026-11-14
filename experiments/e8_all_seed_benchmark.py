@@ -43,26 +43,40 @@ def exhaustive_seed_audit():
 
 def benchmark_graph_modes():
     roots = propagate_root_orbit().roots
-    explicit = GossetGraph("explicit")
-    cached = GossetGraph("cached", max_cache_entries=ROOT_COUNT)
-    implicit = GossetGraph("implicit")
-    def all_neighbors(graph):
-        return tuple(graph.neighbors(root) for root in roots)
-    expected, explicit_metrics = timed_peak(lambda: all_neighbors(explicit))
-    cached_result, cached_metrics = timed_peak(lambda: all_neighbors(cached))
-    implicit_result, implicit_metrics = timed_peak(lambda: all_neighbors(implicit))
+
+    def run_mode(mode):
+        # Include graph construction and the full 240-neighborhood query pass
+        # in both elapsed time and peak traced allocations.
+        cache_limit = ROOT_COUNT if mode == "cached" else 64
+        graph = GossetGraph(mode, max_cache_entries=cache_limit)
+        neighborhoods = tuple(graph.neighbors(root) for root in roots)
+        return neighborhoods, graph.cache_info()
+
+    (expected, explicit_storage), explicit_metrics = timed_peak(
+        lambda: run_mode("explicit")
+    )
+    (cached_result, cached_storage), cached_metrics = timed_peak(
+        lambda: run_mode("cached")
+    )
+    (implicit_result, implicit_storage), implicit_metrics = timed_peak(
+        lambda: run_mode("implicit")
+    )
     if not (expected == cached_result == implicit_result):
         raise AssertionError("explicit, cached, and implicit neighborhoods differ")
     return {
         "queries": ROOT_COUNT,
         "neighbors_per_vertex": 56,
         "all_modes_identical": True,
-        "explicit": explicit_metrics,
-        "cached": cached_metrics,
-        "implicit": implicit_metrics,
+        "explicit": {**explicit_metrics, "storage": explicit_storage},
+        "cached": {**cached_metrics, "storage": cached_storage},
+        "implicit": {**implicit_metrics, "storage": implicit_storage},
+        "measurement_scope": (
+            "Includes graph construction and all neighborhood queries; Python "
+            "tracemalloc peak is not total process RSS."
+        ),
         "interpretation": (
-            "Machine-specific observations only; traced Python allocations are not "
-            "total process RSS and timings are not portable performance guarantees."
+            "Machine-specific observations only; no timing threshold or portable "
+            "performance guarantee is asserted."
         ),
     }
 

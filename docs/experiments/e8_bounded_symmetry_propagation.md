@@ -65,10 +65,11 @@ of the Weyl group.
 - **cached:** retains the orbit and a bounded LRU of requested neighborhoods.
 
 All three modes are asked for all 240 neighborhoods and must return identical
-results. The benchmark records elapsed wall time and Python tracemalloc peak
-allocations. It intentionally has no timing threshold: results depend on the
-runner, and traced allocations are not total process RSS. This compares the
-actual implementations, not an abstract compression ratio.
+results. Each timed mode includes graph construction and the complete
+neighborhood-query pass. The benchmark records elapsed wall time and Python
+tracemalloc peak allocations. It intentionally has no timing threshold:
+results depend on the runner, and traced allocations are not total process
+RSS. Storage snapshots are also reported for context.
 
 ## Exact graph criteria
 
