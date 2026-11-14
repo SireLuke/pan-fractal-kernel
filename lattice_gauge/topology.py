@@ -52,7 +52,7 @@ def clover_field_strength(g, mu: int, nu: int) -> np.ndarray:
         {nu: -1},
     )
     q = sum((_shifted_plaquette(g, mu, nu, off) for off in offsets))
-    f = (q - g.dag(q)) / (8.0j)
+    f = (q - dag(q)) / (8.0j)
     trace = np.einsum("...ii->...", f) / g.N
     f = f - trace[..., None, None] * np.eye(g.N, dtype=complex)
     return f
