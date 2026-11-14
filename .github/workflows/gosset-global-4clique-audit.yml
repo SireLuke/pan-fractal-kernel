@@ -1,0 +1,27 @@
+name: Gosset global 4-clique audit
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [research/gosset-global-4clique-audit-v0]
+  workflow_dispatch:
+
+jobs:
+  global-4clique-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install focused test dependency
+        run: python -m pip install --upgrade pip pytest
+      - name: Run direct global clique tests
+        run: python -m pytest -q tests/test_gosset_global_4cliques.py
+      - name: Run direct global incidence experiment
+        run: PYTHONPATH=. python experiments/gosset_global_4clique_audit.py | tee gosset_global_4clique_audit.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gosset-global-4clique-audit
+          path: gosset_global_4clique_audit.json
