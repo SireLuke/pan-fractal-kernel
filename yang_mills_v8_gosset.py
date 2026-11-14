@@ -169,7 +169,7 @@ def gosset_star_report(root_values: np.ndarray) -> dict:
         "star_mean_global_residual": float(abs(np.mean(stars) - values.mean())),
         "adjacent_star_delta_mean": float(edge_delta.mean()),
         "adjacent_star_delta_max": float(edge_delta.max()),
-        "interpretation": "Index-mapped scalar diagnostic; not a physical E8 embedding.",
+        "interpretation": "Index-mapped scalar diagnostic; not a physical E8 embedding. The zero star-mean/global-mean residual is an identity of the 56-regular graph, not an independent success signal.",
     }
 
 
