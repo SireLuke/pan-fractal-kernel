@@ -11,11 +11,21 @@ jobs:
         with: { fetch-depth: 0 }     # full history: a shallow clone hides the parents of GitHub's synthetic merge commit
       - uses: actions/setup-python@v5
         with: { python-version: "3.11" }
-      - run: pip install numpy scipy
+      - run: pip install numpy scipy pytest
       - name: Independence gate (core imports no PAN module)
         run: python lattice_gauge/tests/test_core_independence.py
       - name: Conformance suite (exact / published reference values)
         run: python lattice_gauge/tests/test_lattice_gauge.py
+      - name: Yang-Mills to V8 and Gosset conformance
+        run: python -m pytest -q tests/test_yang_mills_v8_gosset.py
+      - name: Execute SU(2) and SU(3) through V8 and Gosset
+        run: python run_yang_mills_v8_gosset.py --therm 40 --meas 80 --extent 4 --output yang_mills_v8_gosset_results.json
+      - name: Upload reproducible experiment report
+        uses: actions/upload-artifact@v4
+        with:
+          name: yang-mills-v8-gosset-results
+          path: yang_mills_v8_gosset_results.json
+          if-no-files-found: error
       - name: DCO sign-off present on every commit in the PR
         if: github.event_name == 'pull_request'
         run: |
