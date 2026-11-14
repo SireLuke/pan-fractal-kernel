@@ -8,6 +8,8 @@ from __future__ import annotations
 
 import numpy as np
 
+from lattice_gauge.lattice_gauge import dag
+
 
 def _shifted_plaquette(g, mu: int, nu: int, offset: dict[int, int]):
     """Oriented mu-nu plaquette field with its base point shifted by offset."""
@@ -15,7 +17,7 @@ def _shifted_plaquette(g, mu: int, nu: int, offset: dict[int, int]):
     return (
         links[mu]
         @ g.sh(links[nu], {mu: 1})
-        @ g.dag(g.sh(links[mu], {nu: 1}))
+        @ dag(g.sh(links[mu], {nu: 1}))
         @ g.dag(links[nu])
     )
 
