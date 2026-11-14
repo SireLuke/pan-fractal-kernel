@@ -19,7 +19,13 @@ jobs:
       - name: Yang-Mills to V8 and Gosset conformance
         run: python -m pytest -q tests/test_yang_mills_v8_gosset.py
       - name: Execute SU(2) and SU(3) through V8 and Gosset
-        run: python run_yang_mills_v8_gosset.py --therm 2 --meas 4 --extent 4 --output /tmp/yang_mills_v8_gosset_results.json
+        run: python run_yang_mills_v8_gosset.py --therm 40 --meas 80 --extent 4 --output yang_mills_v8_gosset_results.json
+      - name: Upload reproducible experiment report
+        uses: actions/upload-artifact@v4
+        with:
+          name: yang-mills-v8-gosset-results
+          path: yang_mills_v8_gosset_results.json
+          if-no-files-found: error
       - name: DCO sign-off present on every commit in the PR
         if: github.event_name == 'pull_request'
         run: |
