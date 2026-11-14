@@ -15,6 +15,6 @@ jobs:
         with:
           python-version: "3.11"
       - name: Install focused dependencies
-        run: python -m pip install --upgrade pip numpy pytest
+        run: python -m pip install --upgrade pip numpy scipy pytest
       - name: Run hydrogen shell and adjacent geometry tests
         run: python -m pytest -q tests/test_hydrogen_shell_modes.py tests/test_hydrogen_shell_scale.py tests/test_hydrogen_node_recovery.py tests/test_view_ladder.py tests/test_du_val_e8.py
