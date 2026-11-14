@@ -43,7 +43,23 @@ def run_group(n: int, beta: float, *, dims=(4, 4, 4, 4),
     root_values = gosset_observable_field(current)
     gosset = gosset_star_report(root_values)
     rng = np.random.default_rng(seed + 17)
-    shuffled = gosset_star_report(rng.permutation(root_values))
+    null_delta = np.asarray([
+        gosset_star_report(rng.permutation(root_values))["adjacent_star_delta_mean"]
+        for _ in range(64)
+    ], dtype=float)
+    observed_delta = gosset["adjacent_star_delta_mean"]
+    null_summary = {
+        "permutations": int(len(null_delta)),
+        "mean": float(null_delta.mean()),
+        "std": float(null_delta.std(ddof=1)),
+        "q05": float(np.quantile(null_delta, 0.05)),
+        "median": float(np.quantile(null_delta, 0.50)),
+        "q95": float(np.quantile(null_delta, 0.95)),
+        "empirical_lower_tail_p": float((1 + np.count_nonzero(null_delta <= observed_delta)) /
+                                        (1 + len(null_delta))),
+        "observed_minus_null_mean": float(observed_delta - null_delta.mean()),
+        "interpretation": "Permutation diagnostic for this arbitrary root-index sampling; not evidence of a physical E8 embedding.",
+    }
     return {
         "group": f"SU({n})",
         "N": n,
@@ -66,11 +82,7 @@ def run_group(n: int, beta: float, *, dims=(4, 4, 4, 4),
         "gauge_invariance_control": gauge_control,
         "v8_projection": projected,
         "gosset_local_global": gosset,
-        "gosset_shuffled_null": shuffled,
-        "gosset_adjacent_star_delta_mean_minus_shuffle": (
-            gosset["adjacent_star_delta_mean"] -
-            shuffled["adjacent_star_delta_mean"]
-        ),
+        "gosset_permutation_null": null_summary,
         "statistical_limit": "Naive standard error only; autocorrelation not estimated.",
         "physical_limit": "Finite-lattice computational experiment; no continuum or mass-gap claim.",
     }
@@ -116,7 +128,9 @@ def main() -> None:
             "gauge_invariance_pass": row["gauge_invariance_control"]["pass"],
             "gosset_star_mean_global_residual": row["gosset_local_global"]["star_mean_global_residual"],
             "adjacent_star_delta_mean": row["gosset_local_global"]["adjacent_star_delta_mean"],
-            "shuffled_adjacent_star_delta_mean": row["gosset_shuffled_null"]["adjacent_star_delta_mean"],
+            "permutation_null_mean": row["gosset_permutation_null"]["mean"],
+            "permutation_null_q05_q95": [row["gosset_permutation_null"]["q05"], row["gosset_permutation_null"]["q95"]],
+            "permutation_empirical_lower_tail_p": row["gosset_permutation_null"]["empirical_lower_tail_p"],
         } for row in report["runs"]],
     }, indent=2))
 
