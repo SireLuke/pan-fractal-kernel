@@ -12,14 +12,28 @@ from lattice_gauge.lattice_gauge import dag
 
 
 def _shifted_plaquette(g, mu: int, nu: int, offset: dict[int, int]):
-    """Oriented mu-nu plaquette field with its base point shifted by offset."""
+    """Plaquette based at x+offset, parallel-transported back to x."""
     links = [g.sh(u, offset) for u in g.U]
-    return (
+    p = (
         links[mu]
         @ g.sh(links[nu], {mu: 1})
         @ dag(g.sh(links[mu], {nu: 1}))
-        @ g.dag(links[nu])
+        @ dag(links[nu])
     )
+    if not offset:
+        return p
+    if offset == {mu: -1}:
+        transporter = g.sh(g.U[mu], {mu: -1})
+    elif offset == {nu: -1}:
+        transporter = g.sh(g.U[nu], {nu: -1})
+    elif offset == {mu: -1, nu: -1}:
+        # Path from x-mu-nu to x: first +mu, then +nu.
+        u_mu = g.sh(g.U[mu], {mu: -1, nu: -1})
+        u_nu = g.sh(g.U[nu], {nu: -1})
+        transporter = u_nu @ u_mu
+    else:
+        raise ValueError("unsupported clover offset")
+    return transporter @ p @ dag(transporter)
 
 
 def clover_field_strength(g, mu: int, nu: int) -> np.ndarray:
