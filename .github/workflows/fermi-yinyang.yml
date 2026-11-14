@@ -1,0 +1,20 @@
+name: Fermi yin-yang validation
+on:
+  push:
+    branches: [research/fermi-yinyang]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  fermi-yinyang:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install focused dependencies
+        run: python -m pip install --upgrade pip numpy pytest
+      - name: Run Fermi yin-yang tests
+        run: python -m pytest -q tests/test_fermi_yinyang.py
