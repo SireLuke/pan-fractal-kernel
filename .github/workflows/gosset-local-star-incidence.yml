@@ -1,0 +1,27 @@
+name: Gosset local vertex-star incidence audit
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [research/gosset-local-star-incidence-v0]
+  workflow_dispatch:
+
+jobs:
+  local-star-incidence:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install focused test dependency
+        run: python -m pip install --upgrade pip pytest
+      - name: Run exact local-star tests
+        run: python -m pytest -q tests/test_gosset_local_star.py
+      - name: Run exhaustive 240-vertex incidence audit
+        run: PYTHONPATH=. python experiments/gosset_local_star_audit.py | tee gosset_local_star_audit.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gosset-local-star-incidence
+          path: gosset_local_star_audit.json
