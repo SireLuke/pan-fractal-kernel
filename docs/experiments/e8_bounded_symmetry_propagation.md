@@ -6,7 +6,7 @@
 
 This experiment adapts the useful part of the nested-reference analogy from
 42.zip: represent repeated structure through shared generators and references,
-not duplicated payloads. It does **not** reproduce archive nesting, exploit
+not duplicated payloads. It does not reproduce archive nesting, exploit
 overlapping ZIP headers, or perform uncontrolled decompression.
 
 The E8/Gosset object is a finite graph. Its 240 vertices are generated from
@@ -40,26 +40,35 @@ Breadth-first orbit construction uses explicit limits:
 |---|---:|
 | Unique roots | 240 |
 | Reflection generators | 8 |
-| Generator applications | 1,920 |
+| Generator applications per seed | 1,920 |
 | Search depth | 64 |
 | Gosset edges | 6,720 |
 | Cached neighborhoods | 240 |
 
-The default run reaches all 240 roots in 1,920 generator applications. A
+A default run reaches all 240 roots in 1,920 generator applications. A
 request exceeding its declared node, depth, transition, or edge budget raises
 TraversalBudgetExceeded rather than returning a silently truncated graph.
 
-## Graph representations
+## Exhaustive seed audit
+
+The follow-on experiment starts from every one of the 240 roots, not merely
+three representative roots. It requires every seed to generate the same
+240-element root set, with exactly 1,920 simple-generator applications per
+seed. This is a finite transitivity audit over the root orbit, not enumeration
+of the Weyl group.
+
+## Graph representations and benchmark
 
 - **explicit:** materializes roots, all 6,720 edges, and adjacency lists.
-- **implicit:** retains the seed and generators; regenerates the finite orbit for
-  each requested neighborhood and does not retain an expanded orbit or edge
-  list on the graph instance.
+- **implicit:** retains the seed and generators; regenerates the finite orbit
+  for each neighborhood query.
 - **cached:** retains the orbit and a bounded LRU of requested neighborhoods.
 
-The implicit mode is a reference implementation of on-demand expansion, not a
-claim that the Python runtime has zero temporary memory use. The three modes
-are tested for identical roots, edges, and neighborhoods.
+All three modes are asked for all 240 neighborhoods and must return identical
+results. The benchmark records elapsed wall time and Python tracemalloc peak
+allocations. It intentionally has no timing threshold: results depend on the
+runner, and traced allocations are not total process RSS. This compares the
+actual implementations, not an abstract compression ratio.
 
 ## Exact graph criteria
 
@@ -71,12 +80,13 @@ For doubled roots X and Y, Gosset adjacency is dot(X, Y) = 4
 - 8 simple-reflection generators and exact E8 Gram structure;
 - 6,720 undirected edges and degree 56 at every vertex;
 - agreement between explicit, implicit, and cached graph views;
+- all 240 seeds generate the same root set;
 - explicit failures when a traversal or cache budget is exceeded.
 
 ## Run
 
     python -m pytest -q tests/test_e8_bounded_symmetry.py
-    python experiments/e8_bounded_symmetry_audit.py
+    PYTHONPATH=. python experiments/e8_all_seed_benchmark.py
 
 The workflow uses only Python's standard library plus pytest. This is an exact
 finite combinatorial/software audit, not a Lean proof, physical validation, or
