@@ -1,0 +1,27 @@
+name: E8 bounded symmetry propagation audit
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [research/e8-bounded-symmetry-propagation-v0]
+  workflow_dispatch:
+
+jobs:
+  e8-bounded-symmetry:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install focused test dependency
+        run: python -m pip install --upgrade pip pytest
+      - name: Run exact bounded symmetry tests
+        run: python -m pytest -q tests/test_e8_bounded_symmetry.py
+      - name: Run exhaustive 240-seed and graph-mode benchmark
+        run: PYTHONPATH=. python experiments/e8_all_seed_benchmark.py | tee e8_all_seed_benchmark.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: e8-all-seed-benchmark
+          path: e8_all_seed_benchmark.json
