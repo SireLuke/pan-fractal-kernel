@@ -23,6 +23,7 @@ def _shifted_plaquette(g, mu: int, nu: int, offset: dict[int, int]):
     if not offset:
         return p
     if offset == {mu: -1}:
+        # W transports color from x-mu to x. W† P W transforms at x.
         transporter = g.sh(g.U[mu], {mu: -1})
     elif offset == {nu: -1}:
         transporter = g.sh(g.U[nu], {nu: -1})
@@ -30,10 +31,10 @@ def _shifted_plaquette(g, mu: int, nu: int, offset: dict[int, int]):
         # Path from x-mu-nu to x: first +mu, then +nu.
         u_mu = g.sh(g.U[mu], {mu: -1, nu: -1})
         u_nu = g.sh(g.U[nu], {nu: -1})
-        transporter = u_nu @ u_mu
+        transporter = u_mu @ u_nu
     else:
         raise ValueError("unsupported clover offset")
-    return transporter @ p @ dag(transporter)
+    return dag(transporter) @ p @ transporter
 
 
 def clover_field_strength(g, mu: int, nu: int) -> np.ndarray:

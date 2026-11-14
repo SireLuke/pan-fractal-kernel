@@ -49,3 +49,11 @@ def test_clover_field_strength_antisymmetric_in_indices():
         -clover_field_strength(g, 0, 1),
         atol=1e-12,
     )
+
+
+@pytest.mark.parametrize("n", [2, 3])
+def test_clover_topological_density_is_finite_and_real(n):
+    g = Gauge(n, (4, 4, 4, 4), beta=1.0, seed=23, hot=True)
+    q = clover_topological_density(g)
+    assert np.isrealobj(q)
+    assert np.all(np.isfinite(q))
