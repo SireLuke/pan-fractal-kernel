@@ -11,7 +11,7 @@ jobs:
         with: { fetch-depth: 0 }     # full history: a shallow clone hides the parents of GitHub's synthetic merge commit
       - uses: actions/setup-python@v5
         with: { python-version: "3.11" }
-      - run: pip install numpy scipy
+      - run: pip install numpy scipy pytest
       - name: Independence gate (core imports no PAN module)
         run: python lattice_gauge/tests/test_core_independence.py
       - name: Conformance suite (exact / published reference values)
