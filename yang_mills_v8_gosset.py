@@ -105,7 +105,7 @@ def v8_projection(frame: ObservableFrame, previous: ObservableFrame | None = Non
         tau, tau_measured = float(1.0 / (1.0 + change / 0.05)), True
     values = {
         "h": float(np.clip((frame.plaquette + 1.0) / 2.0, 0.0, 1.0)),
-        "R": float(np.clip((frame.wilson_1x1 + 1.0) / 2.0, 0.0, 1.0)),
+        "R": float(np.clip(1.0 - abs(frame.wilson_1x2 - frame.wilson_1x1 ** 2) / 2.0, 0.0, 1.0)),
         "u": float(np.clip(1.0 - frame.unitarity_residual, 0.0, 1.0)),
         "d": float(np.clip(np.std(local) / scale, 0.0, 1.0)),
         "tau": tau,
