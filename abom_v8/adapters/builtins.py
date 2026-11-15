@@ -1,0 +1,171 @@
+"""Built-in ABOM-V8 plug-ins that wrap existing package-owned capabilities.
+
+These are adapters, not copies of the underlying mathematical engines.
+"""
+from __future__ import annotations
+
+from typing import Any
+
+from .registry import PluginDescriptor, PluginRegistry
+from ..diagnostics.cartesian import curl, divergence, gradient, laplacian
+from ..occupancy.fermi import occupancy_profile
+from ..transport.curves import CurveSamples, sample_bernoulli, sample_gerono
+from ..transport.experiments import compare_lemniscates, resolution_sweep
+from ..harmonics import log_phi_ratio, phi_power
+from ..mu_cube import MuCube, MuCubeRegistry
+from ..state import V8State
+from ..trajectory import V8Trajectory
+from ..visualization.radial_shells import golden_angle_shells
+from ..strata import lemniscate_strata_record
+
+
+class StrataEvidencePlugin:
+    descriptor = PluginDescriptor(
+        "abom.validation.strata-evidence", "0.1.0", ("0.1",),
+        ("validation.strata-report", "validation.evidence-promotion-gate"),
+    )
+
+    create_lemniscate_record = staticmethod(lemniscate_strata_record)
+
+
+class LemniscateComparisonPlugin:
+    descriptor = PluginDescriptor(
+        "abom.experiment.lemniscate-comparison", "0.1.0", ("0.1",),
+        ("experiment.curve-normalization", "experiment.resolution-sweep"),
+    )
+
+    compare = staticmethod(compare_lemniscates)
+    resolution_sweep = staticmethod(resolution_sweep)
+
+
+class GeronoCurvePlugin:
+    descriptor = PluginDescriptor(
+        "abom.transport.gerono", "0.1.0", ("0.1",),
+        ("transport.lemniscate", "transport.bidirectional-candidate"),
+    )
+
+    def sample(self, *, a: float = 1.0, b: float = 0.5,
+               n_samples: int = 401) -> CurveSamples:
+        return sample_gerono(a=a, b=b, n_samples=n_samples)
+
+
+class BernoulliCurvePlugin:
+    descriptor = PluginDescriptor(
+        "abom.transport.bernoulli", "0.1.0", ("0.1",),
+        ("transport.lemniscate", "transport.comparison-candidate"),
+    )
+
+    def sample(self, *, c: float = 1.0, n_samples: int = 401) -> CurveSamples:
+        return sample_bernoulli(c=c, n_samples=n_samples)
+
+
+class FermiOccupancyPlugin:
+    descriptor = PluginDescriptor(
+        "abom.occupancy.fermi-dirac", "0.1.0", ("0.1",),
+        ("occupancy.fermi-dirac", "occupancy.binary-entropy"),
+    )
+
+    def evaluate(self, *, energy: float, chemical_potential: float,
+                 temperature: float):
+        return occupancy_profile(energy, chemical_potential, temperature)
+
+
+class CartesianFieldDiagnosticsPlugin:
+    descriptor = PluginDescriptor(
+        "abom.diagnostics.cartesian-3d", "0.1.0", ("0.1",),
+        ("field.gradient", "field.divergence", "field.curl", "field.laplacian"),
+    )
+
+    gradient = staticmethod(gradient)
+    divergence = staticmethod(divergence)
+    curl = staticmethod(curl)
+    laplacian = staticmethod(laplacian)
+
+
+class MuCubeStatePlugin:
+    descriptor = PluginDescriptor(
+        "abom.state.mu-cube", "0.1.0", ("0.1",),
+        ("state.mu-cube", "state.recursive-containment", "state.occupancy"),
+    )
+
+    def create(self, *, cell_id: str, state: V8State, occupancy: float,
+               resonance: float = 0.5, scale: float = 1.0,
+               recursion_level: int = 0, parent_id: str | None = None,
+               connections: tuple[str, ...] = ()) -> MuCube:
+        return MuCube(cell_id, state, occupancy, resonance, scale,
+                      recursion_level, parent_id, connections)
+
+    def registry(self) -> MuCubeRegistry:
+        return MuCubeRegistry()
+
+
+class V8TrajectoryPlugin:
+    descriptor = PluginDescriptor(
+        "abom.navigation.v8-trajectory", "0.1.0", ("0.1",),
+        ("navigation.past-current-future", "navigation.snapshot-sequence"),
+    )
+
+    def create(self, frames: tuple[V8State, ...], current_index: int = 0) -> V8Trajectory:
+        return V8Trajectory(frames, current_index)
+
+
+class GoldenHarmonicScalePlugin:
+    descriptor = PluginDescriptor(
+        "abom.scale.golden-ratio", "0.1.0", ("0.1",),
+        ("scale.phi-power", "scale.dimensionless-log-ratio"),
+    )
+
+    phi_power = staticmethod(phi_power)
+    log_phi_ratio = staticmethod(log_phi_ratio)
+
+
+class GoldenAngleShellVisualizationPlugin:
+    descriptor = PluginDescriptor(
+        "abom.visualization.golden-angle-shells", "0.1.0", ("0.1",),
+        ("visualization.radial-shells", "visualization.phi-scaled"),
+    )
+
+    generate = staticmethod(golden_angle_shells)
+
+
+class MengerGraphPlugin:
+    """Optional adapter over the Fractal Kernel's existing Menger graph engine."""
+
+    descriptor = PluginDescriptor(
+        "kernel.geometry.menger-finite-graph", "0.1.0", ("0.1",),
+        ("geometry.menger-sponge", "graph.face-adjacency"),
+    )
+
+    def build(self, *, dimension: int = 3, level: int = 1) -> dict[str, Any]:
+        # Lazy import keeps this adapter boundary optional for consumers that
+        # only use occupancy, curves or field diagnostics.
+        from menger_sponge import adjacency, audit_menger, menger_cells
+
+        cells = menger_cells(dimension, level)
+        graph = adjacency(cells, 3**level)
+        audit = audit_menger(dimension, level)
+        return {"dimension": dimension, "level": level,
+                "cells": cells, "adjacency": graph, "audit": audit}
+
+
+def register_builtin_plugins(registry: PluginRegistry) -> dict[str, object]:
+    """Register the stable v0.1 built-ins and return them by plug-in id."""
+    plugins: tuple[object, ...] = (
+        GeronoCurvePlugin(),
+        StrataEvidencePlugin(),
+        LemniscateComparisonPlugin(),
+        BernoulliCurvePlugin(),
+        FermiOccupancyPlugin(),
+        CartesianFieldDiagnosticsPlugin(),
+        MengerGraphPlugin(),
+        MuCubeStatePlugin(),
+        V8TrajectoryPlugin(),
+        GoldenHarmonicScalePlugin(),
+        GoldenAngleShellVisualizationPlugin(),
+    )
+    registered: dict[str, object] = {}
+    for plugin in plugins:
+        descriptor = plugin.descriptor  # type: ignore[attr-defined]
+        registry.register(plugin)  # type: ignore[arg-type]
+        registered[descriptor.plugin_id] = plugin
+    return registered

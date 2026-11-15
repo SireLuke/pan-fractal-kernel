@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:pan:abom-v8:state:0.1",
+  "title": "ABOM-V8 State",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "coordinate_order", "coordinates"],
+  "properties": {
+    "schema_version": { "const": "0.1" },
+    "coordinate_order": {
+      "const": ["h", "R", "u", "d", "tau", "chi", "s", "f"]
+    },
+    "coordinates": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": { "type": "number", "minimum": 0, "maximum": 1 }
+    },
+    "profile": { "type": "string" },
+    "metadata": { "type": "object" }
+  }
+}
