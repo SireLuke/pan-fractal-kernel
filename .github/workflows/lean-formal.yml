@@ -1,0 +1,20 @@
+name: lean-formal
+on:
+  pull_request:
+    paths:
+      - "formal/**"
+      - ".github/workflows/lean-formal.yml"
+  push:
+    branches-ignore: [main]
+    paths:
+      - "formal/**"
+      - ".github/workflows/lean-formal.yml"
+jobs:
+  lean:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: formal
+          build: true
