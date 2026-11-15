@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 from lattice_gauge.gradient_flow import wilson_flow
 from lattice_gauge.lattice_gauge import Gauge
 from run_wilson_flow_sector_scan import scan_one
@@ -8,7 +9,7 @@ def test_flow_history_has_raw_charge_and_action_for_every_step():
     g = Gauge(2, (4, 4, 4, 4), beta=2.0, seed=77, hot=True)
     rows = wilson_flow(g, steps=3, step_size=1e-5)
     assert len(rows) == 4
-    assert [r["flow_time"] for r in rows] == [0.0, 1e-5, 2e-5, 3e-5]
+    assert [r["flow_time"] for r in rows] == pytest.approx([0.0, 1e-5, 2e-5, 3e-5])
     assert all(np.isfinite(r["topological_charge"]) for r in rows)
     assert all(np.isfinite(r["action"]) for r in rows)
 
