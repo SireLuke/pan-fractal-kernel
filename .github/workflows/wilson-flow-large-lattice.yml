@@ -1,0 +1,50 @@
+name: wilson-flow-large-lattice
+# Manual only: a 16^4 thermalized scan takes roughly 1-1.5 hours per group.
+on:
+  workflow_dispatch:
+    inputs:
+      extent:
+        description: "Lattice extent L (L^4 sites, even)"
+        default: "16"
+      steps:
+        description: "Flow steps"
+        default: "150"
+      step_size:
+        description: "Flow step size (RK3)"
+        default: "0.05"
+      therm:
+        description: "Thermalization sweeps"
+        default: "200"
+      sep:
+        description: "Sweeps between configurations"
+        default: "40"
+      configs:
+        description: "Configurations per group"
+        default: "5"
+jobs:
+  large-scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 345
+    strategy:
+      fail-fast: false
+      matrix:
+        group: [2, 3]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements.txt
+      - name: Thermalized flow scan, SU(${{ matrix.group }})
+        run: >
+          python run_wilson_flow_sector_scan.py
+          --extent ${{ inputs.extent }} --steps ${{ inputs.steps }}
+          --step-size ${{ inputs.step_size }} --integrator rk3
+          --start thermalized --therm ${{ inputs.therm }} --sep ${{ inputs.sep }}
+          --configs ${{ inputs.configs }} --seeds 101 --groups ${{ matrix.group }}
+          --output wilson_flow_large_su${{ matrix.group }}.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wilson-flow-large-su${{ matrix.group }}
+          path: wilson_flow_large_su${{ matrix.group }}.json
+          if-no-files-found: error

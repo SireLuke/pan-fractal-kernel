@@ -7,10 +7,14 @@ It does not round Q or claim continuum topological quantization.
 Defaults: 8^4 lattice, third-order Runge-Kutta flow to t = 2.0 (smoothing radius
 sqrt(8t) = 4 lattice spacings, half the extent). Starts are hot (random) links,
 not thermalized configurations, so the scan probes the flow, not an ensemble.
+sqrt(8t) = 4 lattice spacings, half the extent), starting from Metropolis-thermalized
+configurations (SU(2) beta=2.4, SU(3) beta=6.0). `--start hot` flows random links
+instead, which probes the flow rather than an ensemble.
 """
 from __future__ import annotations
 import argparse
 import json
+import sys
 from pathlib import Path
 import numpy as np
 
@@ -23,6 +27,47 @@ def scan_one(n: int, beta: float, seed: int, extent: int = 8,
              integrator: str = "rk3") -> dict:
     g = Gauge(n, (extent,) * 4, beta=beta, seed=seed, hot=True)
     history = wilson_flow(g, steps=steps, step_size=step_size, integrator=integrator)
+def thermalized_links(n: int, beta: float, seed: int, extent: int, therm: int,
+                      n_configs: int, sep: int):
+    """Metropolis-thermalize from a cold start, then yield n_configs link sets.
+
+    A cold start is used deliberately: at 8^4 and SU(3) beta=6.0 the plaquette reaches
+    its equilibrium value (about 0.594) within roughly 100-200 sweeps from cold, while a
+    hot (random) start is still visibly below it after 400. Consecutive configurations
+    are separated by `sep` sweeps. Each yielded item is (links, plaquette) with links
+    copied so flowing them never touches the chain.
+    """
+    g = Gauge(n, (extent,) * 4, beta=beta, seed=seed, hot=False)
+
+    def sweeps(count: int, offset: int = 0) -> None:
+        for i in range(count):
+            g.sweep()
+            if (i + offset) % 10 == 9:
+                g.tune()
+            if (i + offset) % 20 == 19:
+                g.reunitarize()
+
+    sweeps(therm)
+    for k in range(n_configs):
+        sweeps(sep, offset=therm + k * sep)
+        g.reunitarize()
+        yield [u.copy() for u in g.U], g.plaquette()
+
+
+def scan_one(n: int, beta: float, seed: int, extent: int = 8,
+             steps: int = 100, step_size: float = 0.02,
+             integrator: str = "rk3", links=None,
+             start_plaquette: float | None = None) -> dict:
+    g = Gauge(n, (extent,) * 4, beta=beta, seed=seed, hot=links is None)
+    if links is not None:
+        g.U = [u.copy() for u in links]
+    history = wilson_flow(g, steps=steps, step_size=step_size, integrator=integrator)
+    # Wilson-action energy density from the flowed action: E = 12 N (1 - P) per site
+    # = 2 N S / (beta V). t^2 E is the standard flow observable (no literature
+    # comparison is claimed here).
+    volume = float(extent ** 4)
+    for row in history:
+        row["t2E"] = float(row["flow_time"] ** 2 * 2.0 * n * row["action"] / (beta * volume))
     actions = np.asarray([x["action"] for x in history], dtype=float)
     charges = np.asarray([x["topological_charge"] for x in history], dtype=float)
     tail = charges[-min(8, len(charges)):]
@@ -41,6 +86,9 @@ def scan_one(n: int, beta: float, seed: int, extent: int = 8,
         "flow_steps": steps,
         "step_size": step_size,
         "integrator": integrator,
+        "start": "hot" if links is None else "thermalized",
+        "start_plaquette": start_plaquette,
+        "t2E_final": history[-1]["t2E"],
         "flow_time_final": steps * step_size,
         # Gradient-flow smoothing radius sqrt(8t), in lattice spacings; it should
         # stay below about half the extent to avoid finite-volume artefacts.
@@ -67,11 +115,71 @@ def run_campaign(extent: int = 8, steps: int = 100, step_size: float = 0.02,
     for n, beta in ((2, 2.0), (3, 5.5)):
         for seed in seeds:
             runs.append(scan_one(n, beta, seed, extent, steps, step_size, integrator))
+HOT_BETAS = ((2, 2.0), (3, 5.5))
+THERMALIZED_BETAS = ((2, 2.4), (3, 6.0))
+
+
+def run_campaign(extent: int = 8, steps: int = 100, step_size: float = 0.02,
+                 seeds: tuple[int, ...] = (101, 202, 303),
+                 integrator: str = "rk3", start: str = "thermalized",
+                 therm: int = 200, sep: int = 40, configs: int = 5,
+                 groups: tuple[int, ...] = (2, 3), progress: bool = False) -> dict:
+    """Flow campaign over SU(2) and SU(3).
+
+    start="thermalized": one cold-start Metropolis chain per group (seeded by
+    seeds[0]), `therm` sweeps, then `configs` configurations `sep` sweeps apart.
+    start="hot": one flow per seed from random links (the original design).
+    """
+    if start not in ("thermalized", "hot"):
+        raise ValueError("start must be 'thermalized' or 'hot'")
+    runs = []
+    betas = tuple(nb for nb in (THERMALIZED_BETAS if start == "thermalized" else HOT_BETAS)
+                  if nb[0] in groups)
+    if not betas:
+        raise ValueError("groups must include 2 and/or 3")
+
+    def note(row: dict) -> None:
+        if progress:
+            print(f"{row['group']} cfg {row.get('config_index', row['seed'])}: "
+                  f"Q_final={row['Q_final_raw']:.3f} plateau={row['late_flow_plateau_candidate']}",
+                  file=sys.stderr, flush=True)
+
+    for n, beta in betas:
+        if start == "hot":
+            for seed in seeds:
+                runs.append(scan_one(n, beta, seed, extent, steps, step_size, integrator))
+                note(runs[-1])
+        else:
+            for k, (links, plaq) in enumerate(
+                    thermalized_links(n, beta, seeds[0], extent, therm, configs, sep)):
+                row = scan_one(n, beta, seeds[0], extent, steps, step_size, integrator,
+                               links=links, start_plaquette=plaq)
+                row["config_index"] = k
+                runs.append(row)
+                note(row)
+    by_group = {}
+    for r in runs:
+        by_group.setdefault(r["group"], []).append(r)
+    per_group = {
+        grp: {
+            "runs": len(rows),
+            "plateau_candidates": sum(r["late_flow_plateau_candidate"] for r in rows),
+            "mean_start_plaquette": (float(np.mean([r["start_plaquette"] for r in rows]))
+                                     if start == "thermalized" else None),
+            "Q_final_raw": [round(r["Q_final_raw"], 3) for r in rows],
+        }
+        for grp, rows in by_group.items()
+    }
     return {
-        "campaign": "PAN-WILSON-FLOW-SECTOR-SCAN-v1",
+        "campaign": "PAN-WILSON-FLOW-SECTOR-SCAN-v2",
         "design": {
-            "groups": ["SU(2)", "SU(3)"],
+            "groups": [f"SU({n})" for n, _ in betas],
+            "start": start,
+            "betas": {f"SU({n})": b for n, b in betas},
             "seeds": list(seeds),
+            "thermalization_sweeps": therm if start == "thermalized" else None,
+            "separation_sweeps": sep if start == "thermalized" else None,
+            "configs_per_group": configs if start == "thermalized" else None,
             "lattice": [extent] * 4,
             "flow_steps": steps,
             "step_size": step_size,
@@ -85,6 +193,7 @@ def run_campaign(extent: int = 8, steps: int = 100, step_size: float = 0.02,
             "all_actions_monotone": all(r["action_monotone_within_tolerance"] for r in runs),
             "plateau_candidates": sum(r["late_flow_plateau_candidate"] for r in runs),
             "run_count": len(runs),
+            "per_group": per_group,
         },
     }
 
@@ -99,6 +208,18 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=Path("wilson_flow_sector_scan.json"))
     args = parser.parse_args()
     report = run_campaign(args.extent, args.steps, args.step_size, tuple(args.seeds), args.integrator)
+    parser.add_argument("--start", choices=("thermalized", "hot"), default="thermalized")
+    parser.add_argument("--therm", type=int, default=200, help="thermalization sweeps")
+    parser.add_argument("--sep", type=int, default=40, help="sweeps between configurations")
+    parser.add_argument("--configs", type=int, default=5, help="configurations per group")
+    parser.add_argument("--groups", type=int, nargs="+", choices=(2, 3), default=[2, 3],
+                        help="gauge groups N to run (SU(N))")
+    parser.add_argument("--seeds", type=int, nargs="+", default=[101, 202, 303])
+    parser.add_argument("--output", type=Path, default=Path("wilson_flow_sector_scan.json"))
+    args = parser.parse_args()
+    report = run_campaign(args.extent, args.steps, args.step_size, tuple(args.seeds),
+                          args.integrator, args.start, args.therm, args.sep, args.configs,
+                          tuple(args.groups), progress=True)
     args.output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(report["summary"], indent=2))
 

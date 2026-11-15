@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="520" viewBox="0 0 960 520" role="img" aria-labelledby="title desc">
+<title id="title">Feynman Barbershop ruler analysis flow</title>
+<desc id="desc">Canonical growing exponential ruler lines and constant adjacent gap feed a logarithmic cursor, then Feynman parameter sensitivity and numerical validation. The Fermi yin-yang representation is a separate coupled occupancy model.</desc>
+<defs><marker id="a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0 0 L0 6 L9 3Z" fill="#475569"/></marker><style>.b{rx:14;ry:14;stroke-width:2}.h{font:700 19px sans-serif;fill:#0f172a}.t{font:15px sans-serif;fill:#334155}.n{font:13px sans-serif;fill:#64748b}.a{stroke:#475569;stroke-width:2.5;fill:none;marker-end:url(#a)}</style></defs>
+<rect width="960" height="520" fill="#f8fafc"/>
+<text x="480" y="38" text-anchor="middle" class="h">Feynman–Barbershop ruler experiment</text>
+<text x="480" y="61" text-anchor="middle" class="n">Owner-defined geometry · separate analytical and occupancy layers</text>
+<rect x="250" y="84" width="460" height="72" class="b" fill="#dbeafe" stroke="#3b82f6"/>
+<text x="480" y="112" text-anchor="middle" class="h">Exponential ruler family</text><text x="480" y="138" text-anchor="middle" class="t">yₙ(x) = n · bˣ</text>
+<path d="M480 156V188" class="a"/>
+<rect x="250" y="190" width="460" height="72" class="b" fill="#dcfce7" stroke="#16a34a"/>
+<text x="480" y="218" text-anchor="middle" class="h">Index-independent spacing</text><text x="480" y="244" text-anchor="middle" class="t">Δy = yₙ₊₁ − yₙ = bˣ</text>
+<path d="M480 262V294" class="a"/>
+<rect x="250" y="296" width="460" height="72" class="b" fill="#fef3c7" stroke="#d97706"/>
+<text x="480" y="324" text-anchor="middle" class="h">Logarithmic cursor coordinate</text><text x="480" y="350" text-anchor="middle" class="t">x = log_b(L)</text>
+<path d="M480 368V398" class="a"/>
+<rect x="60" y="400" width="390" height="78" class="b" fill="#f3e8ff" stroke="#9333ea"/>
+<text x="255" y="429" text-anchor="middle" class="h">Feynman sensitivity layer</text><text x="255" y="454" text-anchor="middle" class="t">Z(λ), Z′(λ), Z″(λ)</text>
+<rect x="510" y="400" width="390" height="78" class="b" fill="#e2e8f0" stroke="#64748b"/>
+<text x="705" y="429" text-anchor="middle" class="h">Separate ☯️ occupancy model</text><text x="705" y="454" text-anchor="middle" class="t">UHFE area N · UDFE area 1−N</text>
+<text x="480" y="505" text-anchor="middle" class="n">V8 remains (h,R,u,d,τ,χ,s,f); no implicit coordinate assignment</text>
+</svg>
