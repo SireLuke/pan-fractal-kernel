@@ -259,7 +259,9 @@ test remains a software result, not empirical validation of a physical claim.
 - `abom_v8/` contains separately versioned V8 and μ-cube state contracts,
   past/current/future trajectory navigation, a version-aware plug-in registry,
   built-in Gerono/Bernoulli/Fermi/Cartesian/Menger/scale/radial adapters,
-  configurable transport curves, dimensionless φ scaling and field diagnostics.
+  configurable transport curves, dimensionless φ scaling and field diagnostics,
+  exact Menger μ-cube volume/flux identities and a combinatorial 13_3
+  microtubule lattice geometry (pure arithmetic, no physical claims).
 - The canonical coordinate order is `(h, R, u, d, tau, chi, s, f)`, normalized
   to `[0, 1]`; `tau` is the temporal-offset coordinate and provisional `T`
   maps to `tau`.

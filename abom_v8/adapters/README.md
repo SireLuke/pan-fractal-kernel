@@ -4,7 +4,7 @@ ABOM-V8 does not vendor the Fractal Kernel or PANoRAMic.os.
 
 ## Fractal Kernel adapter
 
-The kernel owns mathematical primitives and geometry engines. An ABOM adapter should consume stable kernel APIs and return versioned references/provenance. The built-in plug-ins expose Gerono/Bernoulli curves, Fermi occupancy, Cartesian field diagnostics, μ-cube state, V8 trajectory navigation, golden-ratio scaling and radial-shell visualization. The Menger adapter lazily wraps the existing `menger_sponge.py` functions for finite cells, face adjacency and audit output. It returns the kernel's cell/adjacency objects and audit metadata without copying the engine. Gosset/E8 adapter wiring remains an interface boundary pending a stable, tested API.
+The kernel owns mathematical primitives and geometry engines. An ABOM adapter should consume stable kernel APIs and return versioned references/provenance. The built-in plug-ins expose Gerono/Bernoulli curves, Fermi occupancy, Cartesian field diagnostics, μ-cube state, V8 trajectory navigation, golden-ratio scaling, radial-shell visualization, Menger mu-cube volume/flux identities and the 13_3 microtubule lattice. The Menger adapter lazily wraps the existing `menger_sponge.py` functions for finite cells, face adjacency and audit output. It returns the kernel's cell/adjacency objects and audit metadata without copying the engine. Gosset/E8 adapter wiring remains an interface boundary pending a stable, tested API.
 
 Candidate capabilities:
 - Menger retained-cell graph and its explicitly named graph operators;

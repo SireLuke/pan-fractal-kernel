@@ -28,7 +28,8 @@ The package preserves the established ordering and labels. It does not reinterpr
 - `harmonics.py`: φ-power shells and dimensionless logarithmic scale ratios.
 - `transport/`: curve protocol and parameterized Gerono, Bernoulli and other candidate families.
 - `diagnostics/`: optional scalar/vector differential-operator interface.
-- `occupancy/`: Fermi-Dirac occupancy and binary entropy helpers.
+- `occupancy/`: Fermi-Dirac occupancy and binary entropy helpers, plus exact Menger mu-cube volume and two-state flux identities.
+- `lattice/`: combinatorial 13_3 microtubule lattice geometry (seam, helix families, wrap/unwrap); no physical claims.
 - `adapters/`: version-aware plug-in registry plus built-in curve, occupancy, field-diagnostic, μ-cube, trajectory, golden-scale, radial-shell and lazy Menger adapters; PAN navigation remains an adapter boundary.
 - `experiments/`: isolated visual/geometry/occupancy experiments.
 
@@ -45,4 +46,4 @@ Each layer may be used independently. Importing the base state/navigation API do
 
 ## Status
 
-The first implementation pass includes typed V8 and μ-cube state contracts, past/current/future snapshot navigation, built-in plug-ins, Fermi/entropy helpers, Gerono and Bernoulli curve samplers, dimensionless φ scaling, 3D Cartesian field diagnostics, a Menger graph adapter, a radial-shell visualization generator, and dedicated unit tests. CI is pending. PANoRAMic.os production wiring, Gosset/E8 adapter integration, graph-generalized differential operators and physical transport dynamics remain future milestones.
+The first implementation pass includes typed V8 and μ-cube state contracts, past/current/future snapshot navigation, built-in plug-ins, Fermi/entropy helpers, Gerono and Bernoulli curve samplers, dimensionless φ scaling, 3D Cartesian field diagnostics, a Menger graph adapter, Menger mu-cube volume/flux identities, a 13_3 microtubule lattice geometry module, a radial-shell visualization generator, and dedicated unit tests. CI is pending. PANoRAMic.os production wiring, Gosset/E8 adapter integration, graph-generalized differential operators and physical transport dynamics remain future milestones.
