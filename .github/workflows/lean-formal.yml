@@ -17,4 +17,10 @@ jobs:
       - uses: leanprover/lean-action@v1
         with:
           lake-package-directory: formal
-          build: true
+          auto-config: false
+          build: false
+      - name: Generate Lake manifest and build formal package
+        working-directory: formal
+        run: |
+          lake update
+          lake build
