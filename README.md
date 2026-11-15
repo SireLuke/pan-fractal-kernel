@@ -253,3 +253,7 @@ as an E8 invariant or as evidence of physical correspondence.
 This layer is optional and cannot override primary experimental evidence,
 exact validation gates, or external reference agreement. A green software
 test remains a software result, not empirical validation of a physical claim.
+
+## License
+
+Licensed under the Apache License, Version 2.0. See `LICENSE` and `NOTICE`.

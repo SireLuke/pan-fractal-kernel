@@ -19,7 +19,7 @@ jobs:
       - name: Focused flow tests
         run: python -m pytest -q lattice_gauge/tests/test_gradient_flow.py lattice_gauge/tests/test_flow_sector_scan.py
       - name: Multi-seed SU(2)/SU(3) flow scan
-        run: python run_wilson_flow_sector_scan.py --extent 8 --steps 100 --step-size 0.02 --integrator rk3 --seeds 101 202 303 --output wilson_flow_sector_scan.json
+        run: python run_wilson_flow_sector_scan.py --extent 8 --steps 100 --step-size 0.02 --integrator rk3 --start thermalized --therm 200 --sep 40 --configs 5 --seeds 101 --output wilson_flow_sector_scan.json
       - name: Upload raw flow trajectories
         uses: actions/upload-artifact@v4
         with:
