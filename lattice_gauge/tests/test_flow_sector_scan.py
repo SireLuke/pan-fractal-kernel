@@ -21,3 +21,10 @@ def test_sector_scan_reports_unrounded_charge_and_declared_thresholds():
     assert "late_flow_Q_span" in row
     assert isinstance(row["late_flow_plateau_candidate"], bool)
     assert len(row["trajectory"]) == 3
+
+
+def test_scan_records_integrator_and_smoothing_radius():
+    row = scan_one(2, 2.0, seed=83, extent=4, steps=5, step_size=0.02)
+    assert row["integrator"] == "rk3"
+    assert row["smoothing_radius"] == pytest.approx((8 * 0.1) ** 0.5)
+    assert row["smoothing_radius_over_half_extent"] == pytest.approx(row["smoothing_radius"] / 2.0)

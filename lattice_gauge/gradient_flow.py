@@ -38,8 +38,50 @@ def wilson_flow_step(g, step_size: float = 0.001) -> None:
     g.U = updates
 
 
-def wilson_flow(g, steps: int, step_size: float = 0.001) -> list[dict[str, float]]:
-    """Return raw Wilson action and clover charge at t=0 and every step."""
+def _exp_antihermitian(a: np.ndarray) -> np.ndarray:
+    """exp(A) for anti-Hermitian A, via the Hermitian generator H = -iA (A = iH)."""
+    values, vectors = np.linalg.eigh(-1j * a)
+    return (vectors * np.exp(1j * values)[..., None, :]) @ dag(vectors)
+
+
+def wilson_flow_step_rk3(g, step_size: float = 0.01) -> None:
+    """One third-order Runge-Kutta Wilson-flow step in place (Luscher, arXiv:1006.4518, App. C).
+
+    Same flow equation and force as `wilson_flow_step`, with Z(V) = -force(V):
+        W1 = exp(Z0/4) W0
+        W2 = exp(8/9 Z1 - 17/36 Z0) W1
+        W3 = exp(3/4 Z2 - 8/9 Z1 + 17/36 Z0) W2
+    where Z_i = step_size * Z(W_i). Third order in step_size, so much larger steps
+    are stable than for the explicit Euler step.
+    """
+    if not np.isfinite(step_size) or step_size <= 0:
+        raise ValueError("step_size must be finite and positive")
+
+    def z_field(links):
+        g.U = links
+        return [-step_size * _project_suN(links[mu] @ g.staple(mu)) for mu in range(g.d)]
+
+    w0 = [u.copy() for u in g.U]
+    z0 = z_field(w0)
+    w1 = [_exp_antihermitian(z / 4.0) @ w for z, w in zip(z0, w0)]
+    z1 = z_field(w1)
+    w2 = [_exp_antihermitian(8.0 / 9.0 * b - 17.0 / 36.0 * a) @ w
+          for a, b, w in zip(z0, z1, w1)]
+    z2 = z_field(w2)
+    g.U = [_exp_antihermitian(0.75 * c - 8.0 / 9.0 * b + 17.0 / 36.0 * a) @ w
+           for a, b, c, w in zip(z0, z1, z2, w2)]
+
+
+def wilson_flow(g, steps: int, step_size: float = 0.001,
+                integrator: str = "euler") -> list[dict[str, float]]:
+    """Return raw Wilson action and clover charge at t=0 and every step.
+
+    integrator: "euler" (default, original behaviour) or "rk3" (Luscher third-order).
+    """
+    steppers = {"euler": wilson_flow_step, "rk3": wilson_flow_step_rk3}
+    if integrator not in steppers:
+        raise ValueError(f"integrator must be one of {sorted(steppers)}")
+    step = steppers[integrator]
     if g.d != 4:
         raise ValueError("Wilson topology flow requires exactly 4 dimensions")
     if steps < 0:
@@ -51,7 +93,7 @@ def wilson_flow(g, steps: int, step_size: float = 0.001) -> list[dict[str, float
         "topological_charge": float(clover_topological_charge(g)),
     }]
     for i in range(steps):
-        wilson_flow_step(g, step_size)
+        step(g, step_size)
         history.append({
             "flow_time": (i + 1) * step_size,
             "action": float(g.action()),
