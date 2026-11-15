@@ -2,6 +2,54 @@
 
 An open computational research kernel for the PAN V8 coordinate model.
 
+## Quick start
+
+Requires Python 3.11+ (CI uses 3.11; also run on 3.13). Pure Python on NumPy, SciPy and matplotlib, with no GPU or compiled code of its own. Only Linux is exercised in CI.
+
+```bash
+git clone https://github.com/SireLuke/pan-fractal-kernel
+cd pan-fractal-kernel
+python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
+python -m pip install -r requirements-dev.txt       # runtime only: requirements.txt
+python -m pytest -q tests                           # about 2 min
+```
+
+Smoke test, run from the repository root:
+
+```python
+from hydra_semantic_reader import read_semantics
+from view_ladder import gosset_seeded_ladder, validate_schema
+
+# V8 order: h, R, u, d, tau, chi, s, f -- every value normalized to [0, 1]
+frame = read_semantics([0.5, 0.5, 0.5, 0.5, 0.5, 0.0, 0.5, 0.5])
+print(frame.uhfe_heads, frame.udfe_heads)
+
+ladder = gosset_seeded_ladder()          # 8D -> 4D -> 3D -> 2D views of the 240 E8 roots
+validate_schema(ladder.to_schema())
+```
+
+Modules live at the repository root and import each other by name, so run scripts and
+tests from the root. Longer suites are run directly: `python lattice_gauge/tests/test_lattice_gauge.py`
+(about 2.5 min). Each experiment has a `run_*.py` entry point and a matching CI workflow in
+`.github/workflows/`, which is the reference for exact arguments.
+
+## Module map
+
+Everything below is a software result unless a document says otherwise; see the evidence
+notes in each layer's own document.
+
+| Layer | Modules | Documents |
+|---|---|---|
+| V8 core and Janus Hydra | `janus_hydra`, `hydra_semantic_reader`, `janus_metrics`, `jobf_v0_2`, `geometry_adapter`, `cauchy_janus` | `JANUS_HYDRA_GEOMETRY.md` |
+| Phase layers (experimental) | `pan_v8_phase_lock`, `pan_v8_janus_phase`, `fermi_sea` | `PAN_V8_DYNAMIC_PHASE_LAYER.md`, `PAN_V8_JANUS_PHASE_INTEGRATION.md` |
+| Gosset 4_21 / E8 geometry | `gosset_421`, `gosset_projection`, `gosset_3d_simulation`, `gosset_local_star`, `gosset_global_4cliques`, `e8_bounded_symmetry`, `du_val_e8`, `kac_moody_en` | `GOSSET_421_GEOMETRY.md`, `GOSSET_PROJECTION_ENGINE.md`, `DEEP_GEOMETRY_EXPERIMENTS_2026-11-09.md` |
+| 5_21 / affine E8 and view ladders | `five21_neighborhood`, `five21_star`, `view_ladder`, `v9_affine_e8_projection`, `pan_geometric_depth` | `VIEW_LADDER_SCHEMA.md`, `FIVE21_NEIGHBORHOOD_EXPERIMENT.md`, `PAN_V9_AFFINE_E8_EXPERIMENT.md`, `PAN_GEOMETRIC_DEPTH_ENGINE.md`, `M_THEORY_11D_5_21_INTEGRATION.md`, `M_THEORY_11D_5_21_EXPERIMENT_REPORT.md` |
+| Hydrogen on shell views | `hydrogen_shell_modes`, `hydrogen_shell_scale`, `hydrogen_node_recovery`, `run_hydrogen_*_experiment` | `HYDROGEN_SHELL_MODES.md`, `HYDROGEN_SHELL_SCALE_RULE.md`, `HYDROGEN_NODE_RECOVERY.md` |
+| Lattice gauge and QCD benchmarks | `lattice_gauge/`, `yang_mills_v8_gosset`, `run_yang_mills_v8_gosset`, `run_wilson_flow_sector_scan`, `qcd_reference`, `qcd_ingest` | `lattice_gauge/README.md`, `QCD_BENCHMARK.md`, `NAHT_QCD_JUNCTIONS.md` |
+| History and transitions | `transition_algebra`, `pan_transition_benchmarks`, `naht_topology`, `naht_su2` | `NAHT_QCD_JUNCTIONS.md` |
+| Observational ingestion | `ingest_gaia_v8`, `ingest_grmhd_v8`, `v8_ingest_common`, `spectroscopy`, `spectral_provenance`, `spectral_feature_bridge`, `spectral_sensitivity` | `DATA_INGESTION.md` |
+| Comparison and validation | `pan_experimental_comparison`, `pan_sandbox_metrics`, `tests/`, `formal/` (Lean 4) | `PAN_VALIDATION_HARNESS.md`, `formal/README.md` |
+
 ## Architecture
 
 `hydra_semantic_reader.py` is the canonical semantic gateway:

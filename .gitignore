@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+*.egg-info/
+.ipynb_checkpoints/
+
+# Generated experiment outputs (CI uploads these as artifacts; do not commit them)
+wilson_flow_sector_scan.json
+yang_mills_v8_gosset_results.json
+gaia_v8_jobf_test.csv

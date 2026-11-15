@@ -1,7 +1,7 @@
 # lattice_gauge: SU(2)/SU(3) Wilson lattice gauge toy, any dimension
 
 Periodic hypercubic lattice, Wilson action, checkerboard Metropolis, NumPy only (+SciPy for Bessel references).
-Run `python tests/test_lattice_gauge.py` (about 2.5 min) and `python tests/test_core_independence.py`.
+From the repository root, run `python lattice_gauge/tests/test_lattice_gauge.py` (about 2.5 min; also collectable with pytest) and `python lattice_gauge/tests/test_core_independence.py`.
 
 ## What is checked (all pass)
 - group closure, local dS = full dS in 3D, gauge invariance (loops yes, single links no), hot/cold agreement
