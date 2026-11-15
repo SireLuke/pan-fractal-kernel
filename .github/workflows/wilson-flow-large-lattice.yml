@@ -1,5 +1,5 @@
 name: wilson-flow-large-lattice
-# Manual only: a 16^4 thermalized scan takes roughly 1-1.5 hours per group.
+# Manual only: measured 37 min (SU(2)) and 52 min (SU(3)) per group at 16^4; cost scales as L^4.
 on:
   workflow_dispatch:
     inputs:
@@ -21,6 +21,12 @@ on:
       configs:
         description: "Configurations per group"
         default: "5"
+      groups:
+        description: "JSON list of N, e.g. [2] or [2,3]"
+        default: "[2,3]"
+      betas:
+        description: "Optional per-group beta overrides, space separated, e.g. 3=5.85 10=45"
+        default: ""
 jobs:
   large-scan:
     runs-on: ubuntu-latest
@@ -28,7 +34,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        group: [2, 3]
+        group: ${{ fromJSON(inputs.groups) }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -42,6 +48,7 @@ jobs:
           --step-size ${{ inputs.step_size }} --integrator rk3
           --start thermalized --therm ${{ inputs.therm }} --sep ${{ inputs.sep }}
           --configs ${{ inputs.configs }} --seeds 101 --groups ${{ matrix.group }}
+          --beta ${{ inputs.betas }}
           --output wilson_flow_large_su${{ matrix.group }}.json
       - uses: actions/upload-artifact@v4
         with:
