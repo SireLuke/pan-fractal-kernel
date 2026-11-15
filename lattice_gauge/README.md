@@ -1,7 +1,7 @@
 # lattice_gauge: SU(2)/SU(3) Wilson lattice gauge toy, any dimension
 
 Periodic hypercubic lattice, Wilson action, checkerboard Metropolis, NumPy only (+SciPy for Bessel references).
-Run `python tests/test_lattice_gauge.py` (about 2.5 min) and `python tests/test_core_independence.py`.
+From the repository root, run `python lattice_gauge/tests/test_lattice_gauge.py` (about 2.5 min; also collectable with pytest) and `python lattice_gauge/tests/test_core_independence.py`.
 
 ## What is checked (all pass)
 - group closure, local dS = full dS in 3D, gauge invariance (loops yes, single links no), hot/cold agreement
@@ -16,3 +16,8 @@ No published SU(2) 4D numbers were sourced; those points are sanity-checked only
 ## Limits
 Toy model. 20-bin blocking errors, autocorrelation not estimated, single volume (no finite-size or continuum extrapolation),
 strong-coupling series is truncated and only meaningful at small beta. Not a physical-QCD claim. See GATES.md.
+
+## Large-lattice flow scan (manual)
+`run_wilson_flow_sector_scan.py` defaults to a CI-sized 8^4 scan. For 16^4, run the `wilson-flow-large-lattice`
+workflow from the Actions tab (about 1-1.5 h per group, SU(2) and SU(3) in parallel). Locally, use
+`--extent 16 --steps 150 --step-size 0.05 --groups 3`.

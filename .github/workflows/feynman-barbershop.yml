@@ -1,0 +1,26 @@
+name: Feynman-Barbershop validation
+
+on:
+  push:
+    branches: [research/feynman-barbershop-v8-v0]
+  pull_request:
+    branches: [main]
+    paths:
+      - "feynman_barbershop.py"
+      - "tests/test_feynman_barbershop.py"
+      - "docs/FEYNMAN_BARBERSHOP_V8.md"
+      - ".github/workflows/feynman-barbershop.yml"
+  workflow_dispatch:
+
+jobs:
+  feynman-barbershop:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install test dependency
+        run: python -m pip install --upgrade pip pytest
+      - name: Run focused validation
+        run: python -m pytest -q tests/test_feynman_barbershop.py
