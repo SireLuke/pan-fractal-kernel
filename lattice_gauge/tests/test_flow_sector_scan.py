@@ -55,5 +55,19 @@ def test_campaign_can_be_restricted_to_one_group():
                        groups=(2,))
     assert rep["design"]["groups"] == ["SU(2)"]
     assert [r["group"] for r in rep["runs"]] == ["SU(2)"]
-    with pytest.raises(ValueError, match="groups"):
+    with pytest.raises(ValueError, match="beta"):
         run_campaign(extent=4, steps=1, groups=(5,))
+    with pytest.raises(ValueError, match="groups"):
+        run_campaign(extent=4, steps=1, groups=(1,))
+
+
+def test_campaign_accepts_general_n_with_explicit_beta():
+    from run_wilson_flow_sector_scan import parse_beta_overrides, run_campaign
+    assert parse_beta_overrides(["10=45", "2=2.5"]) == {10: 45.0, 2: 2.5}
+    with pytest.raises(ValueError):
+        parse_beta_overrides(["10"])
+    rep = run_campaign(extent=4, steps=2, step_size=0.02, therm=10, sep=2, configs=1,
+                       groups=(4,), betas={4: 12.0})
+    assert rep["design"]["groups"] == ["SU(4)"]
+    assert rep["design"]["betas"] == {"SU(4)": 12.0}
+    assert rep["runs"][0]["N"] == 4
