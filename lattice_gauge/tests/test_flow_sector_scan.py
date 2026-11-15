@@ -47,3 +47,13 @@ def test_thermalized_links_are_distinct_unitary_and_flow_tagged():
     assert row["trajectory"][0]["t2E"] == 0.0
     # flowing the copy must not touch the yielded links
     assert all(np.array_equal(a, b) for a, b in zip(l0, out[0][0]))
+
+
+def test_campaign_can_be_restricted_to_one_group():
+    from run_wilson_flow_sector_scan import run_campaign
+    rep = run_campaign(extent=4, steps=2, step_size=0.02, therm=10, sep=2, configs=1,
+                       groups=(2,))
+    assert rep["design"]["groups"] == ["SU(2)"]
+    assert [r["group"] for r in rep["runs"]] == ["SU(2)"]
+    with pytest.raises(ValueError, match="groups"):
+        run_campaign(extent=4, steps=1, groups=(5,))

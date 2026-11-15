@@ -12,6 +12,7 @@ instead, which probes the flow rather than an ensemble.
 from __future__ import annotations
 import argparse
 import json
+import sys
 from pathlib import Path
 import numpy as np
 
@@ -107,7 +108,8 @@ THERMALIZED_BETAS = ((2, 2.4), (3, 6.0))
 def run_campaign(extent: int = 8, steps: int = 100, step_size: float = 0.02,
                  seeds: tuple[int, ...] = (101, 202, 303),
                  integrator: str = "rk3", start: str = "thermalized",
-                 therm: int = 200, sep: int = 40, configs: int = 5) -> dict:
+                 therm: int = 200, sep: int = 40, configs: int = 5,
+                 groups: tuple[int, ...] = (2, 3), progress: bool = False) -> dict:
     """Flow campaign over SU(2) and SU(3).
 
     start="thermalized": one cold-start Metropolis chain per group (seeded by
@@ -117,11 +119,22 @@ def run_campaign(extent: int = 8, steps: int = 100, step_size: float = 0.02,
     if start not in ("thermalized", "hot"):
         raise ValueError("start must be 'thermalized' or 'hot'")
     runs = []
-    betas = THERMALIZED_BETAS if start == "thermalized" else HOT_BETAS
+    betas = tuple(nb for nb in (THERMALIZED_BETAS if start == "thermalized" else HOT_BETAS)
+                  if nb[0] in groups)
+    if not betas:
+        raise ValueError("groups must include 2 and/or 3")
+
+    def note(row: dict) -> None:
+        if progress:
+            print(f"{row['group']} cfg {row.get('config_index', row['seed'])}: "
+                  f"Q_final={row['Q_final_raw']:.3f} plateau={row['late_flow_plateau_candidate']}",
+                  file=sys.stderr, flush=True)
+
     for n, beta in betas:
         if start == "hot":
             for seed in seeds:
                 runs.append(scan_one(n, beta, seed, extent, steps, step_size, integrator))
+                note(runs[-1])
         else:
             for k, (links, plaq) in enumerate(
                     thermalized_links(n, beta, seeds[0], extent, therm, configs, sep)):
@@ -129,6 +142,7 @@ def run_campaign(extent: int = 8, steps: int = 100, step_size: float = 0.02,
                                links=links, start_plaquette=plaq)
                 row["config_index"] = k
                 runs.append(row)
+                note(row)
     by_group = {}
     for r in runs:
         by_group.setdefault(r["group"], []).append(r)
@@ -145,7 +159,7 @@ def run_campaign(extent: int = 8, steps: int = 100, step_size: float = 0.02,
     return {
         "campaign": "PAN-WILSON-FLOW-SECTOR-SCAN-v2",
         "design": {
-            "groups": ["SU(2)", "SU(3)"],
+            "groups": [f"SU({n})" for n, _ in betas],
             "start": start,
             "betas": {f"SU({n})": b for n, b in betas},
             "seeds": list(seeds),
@@ -180,11 +194,14 @@ def main() -> None:
     parser.add_argument("--therm", type=int, default=200, help="thermalization sweeps")
     parser.add_argument("--sep", type=int, default=40, help="sweeps between configurations")
     parser.add_argument("--configs", type=int, default=5, help="configurations per group")
+    parser.add_argument("--groups", type=int, nargs="+", choices=(2, 3), default=[2, 3],
+                        help="gauge groups N to run (SU(N))")
     parser.add_argument("--seeds", type=int, nargs="+", default=[101, 202, 303])
     parser.add_argument("--output", type=Path, default=Path("wilson_flow_sector_scan.json"))
     args = parser.parse_args()
     report = run_campaign(args.extent, args.steps, args.step_size, tuple(args.seeds),
-                          args.integrator, args.start, args.therm, args.sep, args.configs)
+                          args.integrator, args.start, args.therm, args.sep, args.configs,
+                          tuple(args.groups), progress=True)
     args.output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(report["summary"], indent=2))
 
