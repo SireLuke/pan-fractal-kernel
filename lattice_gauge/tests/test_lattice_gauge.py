@@ -1,6 +1,6 @@
-import itertools, sys, pathlib; sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
+import itertools, sys, pathlib; sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
 import numpy as np
-from lattice_gauge import *
+from lattice_gauge.lattice_gauge import *
 RNG = np.random.default_rng(11)
 def close(a, b, tol, msg): assert abs(a - b) <= tol, f"{msg}: {a} vs {b} (tol {tol})"
 
