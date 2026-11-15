@@ -9,6 +9,11 @@ from typing import Any
 from .registry import PluginDescriptor, PluginRegistry
 from ..diagnostics.cartesian import curl, divergence, gradient, laplacian
 from ..occupancy.fermi import occupancy_profile
+from ..occupancy.menger import (
+    flux_from_asymmetry, lemniscate_flux, menger_hausdorff_dimension,
+    menger_volume_fraction, mu_cube_volume,
+)
+from ..lattice.microtubule import MicrotubuleLattice
 from ..transport.curves import CurveSamples, sample_bernoulli, sample_gerono
 from ..transport.experiments import compare_lemniscates, resolution_sweep
 from ..harmonics import log_phi_ratio, phi_power
@@ -148,6 +153,35 @@ class MengerGraphPlugin:
                 "cells": cells, "adjacency": graph, "audit": audit}
 
 
+class MengerMuCubePlugin:
+    """Exact Menger volume/flux identities over occupancy (no physical claim)."""
+
+    descriptor = PluginDescriptor(
+        "abom.occupancy.menger-mu-cube", "0.1.0", ("0.1",),
+        ("occupancy.menger-volume", "occupancy.two-state-flux",
+         "geometry.similarity-dimension"),
+    )
+
+    volume_fraction = staticmethod(menger_volume_fraction)
+    mu_cube_volume = staticmethod(mu_cube_volume)
+    hausdorff_dimension = staticmethod(menger_hausdorff_dimension)
+    flux = staticmethod(lemniscate_flux)
+    flux_from_asymmetry = staticmethod(flux_from_asymmetry)
+
+
+class MicrotubuleLatticePlugin:
+    """Combinatorial 13_3 microtubule lattice geometry (nominal parameters)."""
+
+    descriptor = PluginDescriptor(
+        "abom.lattice.microtubule-13-3", "0.1.0", ("0.1",),
+        ("lattice.helix-families", "lattice.seam", "lattice.wrap-unwrap"),
+    )
+
+    def create(self, *, n_protofilaments: int = 13, start: int = 3,
+               monomer_nm: float = 4.0, radius_nm: float = 10.0) -> MicrotubuleLattice:
+        return MicrotubuleLattice(n_protofilaments, start, monomer_nm, radius_nm)
+
+
 def register_builtin_plugins(registry: PluginRegistry) -> dict[str, object]:
     """Register the stable v0.1 built-ins and return them by plug-in id."""
     plugins: tuple[object, ...] = (
@@ -162,6 +196,8 @@ def register_builtin_plugins(registry: PluginRegistry) -> dict[str, object]:
         V8TrajectoryPlugin(),
         GoldenHarmonicScalePlugin(),
         GoldenAngleShellVisualizationPlugin(),
+        MengerMuCubePlugin(),
+        MicrotubuleLatticePlugin(),
     )
     registered: dict[str, object] = {}
     for plugin in plugins:

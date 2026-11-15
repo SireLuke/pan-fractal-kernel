@@ -4,7 +4,8 @@ import pytest
 from abom_v8.adapters.builtins import (
     BernoulliCurvePlugin, CartesianFieldDiagnosticsPlugin, FermiOccupancyPlugin,
     GeronoCurvePlugin, GoldenAngleShellVisualizationPlugin, GoldenHarmonicScalePlugin, LemniscateComparisonPlugin, MengerGraphPlugin, StrataEvidencePlugin,
-    MuCubeStatePlugin, V8TrajectoryPlugin, register_builtin_plugins,
+    MuCubeStatePlugin, V8TrajectoryPlugin, MengerMuCubePlugin, MicrotubuleLatticePlugin,
+    register_builtin_plugins,
 )
 from abom_v8.adapters.registry import PluginRegistry
 from abom_v8.state import V8State
@@ -13,13 +14,15 @@ from abom_v8.state import V8State
 def test_builtin_plugins_register_as_optional_capabilities():
     registry = PluginRegistry()
     plugins = register_builtin_plugins(registry)
-    assert len(plugins) == 11
+    assert len(plugins) == 13
     assert "abom.validation.strata-evidence" in plugins
     assert "abom.experiment.lemniscate-comparison" in plugins
     assert "abom.visualization.golden-angle-shells" in plugins
     assert "abom.state.mu-cube" in plugins
     assert "abom.navigation.v8-trajectory" in plugins
     assert "abom.scale.golden-ratio" in plugins
+    assert registry.resolve("abom.occupancy.menger-mu-cube", schema_version="0.1") is plugins["abom.occupancy.menger-mu-cube"]
+    assert registry.resolve("abom.lattice.microtubule-13-3", schema_version="0.1") is plugins["abom.lattice.microtubule-13-3"]
     assert registry.resolve("abom.transport.gerono", schema_version="0.1") is plugins["abom.transport.gerono"]
     assert registry.resolve("kernel.geometry.menger-finite-graph", schema_version="0.1") is plugins["kernel.geometry.menger-finite-graph"]
     assert registry.resolve("abom.state.mu-cube", schema_version="0.1") is plugins["abom.state.mu-cube"]
@@ -80,3 +83,15 @@ def test_mu_cube_trajectory_and_harmonic_adapters():
 
     shells = GoldenAngleShellVisualizationPlugin.generate(shell_count=3, points_per_shell=8)
     assert shells.shape == (3, 8, 2)
+
+
+def test_menger_mu_cube_and_microtubule_adapters():
+    menger = MengerMuCubePlugin
+    assert menger.volume_fraction(2) == pytest.approx((20 / 27) ** 2)
+    assert menger.flux(0.5) == pytest.approx(0.25)
+    assert menger.flux_from_asymmetry(0.0) == pytest.approx(0.25)
+    assert menger.hausdorff_dimension(3) == pytest.approx(2.7268, abs=1e-4)
+
+    lattice = MicrotubuleLatticePlugin().create()
+    assert lattice.seam_vector == (13, -3)
+    assert lattice.families_are_fibonacci_closed() is True
