@@ -1,0 +1,37 @@
+name: ABOM-V8 modular package validation
+
+on:
+  pull_request:
+    paths:
+      - "abom_v8/**"
+      - "tests/test_abom_v8_*.py"
+      - "tests/test_fermi_yinyang.py"
+      - ".github/workflows/abom-v8.yml"
+  push:
+    branches: [main]
+    paths:
+      - "abom_v8/**"
+      - "tests/test_abom_v8_*.py"
+      - "tests/test_fermi_yinyang.py"
+      - ".github/workflows/abom-v8.yml"
+  workflow_dispatch:
+
+jobs:
+  abom-v8-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install test dependencies
+        run: python -m pip install --upgrade pip -r requirements-dev.txt
+      - name: Import public ABOM-V8 core API
+        run: python -c "from abom_v8 import V8State, MuCube, V8Trajectory; print('ABOM-V8 core import OK')"
+      - name: Run ABOM-V8 and occupancy regression tests
+        env:
+          MPLBACKEND: Agg
+        run: python -m pytest -q tests/test_abom_v8_*.py tests/test_fermi_yinyang.py

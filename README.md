@@ -254,6 +254,30 @@ This layer is optional and cannot override primary experimental evidence,
 exact validation gates, or external reference agreement. A green software
 test remains a software result, not empirical validation of a physical claim.
 
+## ABOM-V8 modular manifold/navigation layer (experimental)
+
+- `abom_v8/` contains separately versioned V8 and μ-cube state contracts,
+  past/current/future trajectory navigation, a version-aware plug-in registry,
+  built-in Gerono/Bernoulli/Fermi/Cartesian/Menger/scale/radial adapters,
+  configurable transport curves, dimensionless φ scaling and field diagnostics.
+- The canonical coordinate order is `(h, R, u, d, tau, chi, s, f)`, normalized
+  to `[0, 1]`; `tau` is the temporal-offset coordinate and provisional `T`
+  maps to `tau`.
+- ABOM-V8 reuses the kernel's existing `fermi_yinyang.py` geometry rather than
+  forking it. Kernel mathematical engines remain kernel-owned; ABOM adapters
+  expose plug-in boundaries rather than duplicating those implementations.
+- Cartesian gradient/divergence/curl/Laplacian routines apply only to smooth
+  fields on a uniform 3D Cartesian grid. They are not Menger graph, Gosset,
+  or general 8D manifold operators.
+- Gerono is the initial configurable lemniscate candidate. Bernoulli is
+  implemented as a comparison candidate; neither is asserted as the final
+  transport geometry. The radial shell generator is visualization-only and
+  is not an E8 or quasicrystal construction.
+- Tests: `tests/test_abom_v8_*.py`. This package is an experimental software
+  layer, not a physical-validation claim and not yet wired into PANoRAMic.os.
+
+Project attribution: Lucas Thouvenell (`@SireLuke`).
+
 ## License
 
 Licensed under the Apache License, Version 2.0. See `LICENSE` and `NOTICE`.
