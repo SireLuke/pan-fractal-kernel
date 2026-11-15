@@ -1,0 +1,25 @@
+name: lean-formal
+on:
+  pull_request:
+    paths:
+      - "formal/**"
+      - ".github/workflows/lean-formal.yml"
+  push:
+    branches-ignore: [main]
+    paths:
+      - "formal/**"
+      - ".github/workflows/lean-formal.yml"
+jobs:
+  lean:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4.19.0
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.19.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Generate Lake manifest and build formal package
+        working-directory: formal
+        run: |
+          lake update
+          lake build
