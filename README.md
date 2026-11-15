@@ -44,9 +44,9 @@ notes in each layer's own document.
 
 | Layer | Modules | Documents |
 |---|---|---|
-| V8 core and Janus Hydra | `janus_hydra`, `hydra_semantic_reader`, `janus_metrics`, `jobf_v0_2`, `geometry_adapter`, `cauchy_janus` | `JANUS_HYDRA_GEOMETRY.md` |
-| Phase layers (experimental) | `pan_v8_phase_lock`, `pan_v8_janus_phase`, `fermi_sea` | `PAN_V8_DYNAMIC_PHASE_LAYER.md`, `PAN_V8_JANUS_PHASE_INTEGRATION.md` |
-| Gosset 4_21 / E8 geometry | `gosset_421`, `gosset_projection`, `gosset_3d_simulation`, `gosset_local_star`, `gosset_global_4cliques`, `e8_bounded_symmetry`, `du_val_e8`, `kac_moody_en` | `GOSSET_421_GEOMETRY.md`, `GOSSET_PROJECTION_ENGINE.md`, `DEEP_GEOMETRY_EXPERIMENTS_2026-11-09.md` |
+| V8 core and Janus Hydra | `janus_hydra`, `hydra_semantic_reader`, `janus_metrics`, `jobf_v0_2`, `geometry_adapter`, `cauchy_janus`, `feynman_barbershop` | `JANUS_HYDRA_GEOMETRY.md`, `docs/FEYNMAN_BARBERSHOP_V8.md` |
+| Phase layers (experimental) | `pan_v8_phase_lock`, `pan_v8_janus_phase`, `fermi_sea`, `fermi_yinyang` | `PAN_V8_DYNAMIC_PHASE_LAYER.md`, `PAN_V8_JANUS_PHASE_INTEGRATION.md` |
+| Gosset 4_21 / E8 geometry | `gosset_421`, `gosset_projection`, `menger_sponge`, `gosset_3d_simulation`, `gosset_local_star`, `gosset_global_4cliques`, `e8_bounded_symmetry`, `du_val_e8`, `kac_moody_en` | `GOSSET_421_GEOMETRY.md`, `GOSSET_PROJECTION_ENGINE.md`, `MENGER_SPONGE.md`, `DEEP_GEOMETRY_EXPERIMENTS_2026-11-09.md` |
 | 5_21 / affine E8 and view ladders | `five21_neighborhood`, `five21_star`, `view_ladder`, `v9_affine_e8_projection`, `pan_geometric_depth` | `VIEW_LADDER_SCHEMA.md`, `FIVE21_NEIGHBORHOOD_EXPERIMENT.md`, `PAN_V9_AFFINE_E8_EXPERIMENT.md`, `PAN_GEOMETRIC_DEPTH_ENGINE.md`, `M_THEORY_11D_5_21_INTEGRATION.md`, `M_THEORY_11D_5_21_EXPERIMENT_REPORT.md` |
 | Hydrogen on shell views | `hydrogen_shell_modes`, `hydrogen_shell_scale`, `hydrogen_node_recovery`, `run_hydrogen_*_experiment` | `HYDROGEN_SHELL_MODES.md`, `HYDROGEN_SHELL_SCALE_RULE.md`, `HYDROGEN_NODE_RECOVERY.md` |
 | Lattice gauge and QCD benchmarks | `lattice_gauge/`, `yang_mills_v8_gosset`, `run_yang_mills_v8_gosset`, `run_wilson_flow_sector_scan`, `qcd_reference`, `qcd_ingest` | `lattice_gauge/README.md`, `QCD_BENCHMARK.md`, `NAHT_QCD_JUNCTIONS.md` |
