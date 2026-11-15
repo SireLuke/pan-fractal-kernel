@@ -4,7 +4,7 @@ This package begins the machine-checked mathematical schema for PAN. It is isola
 
 ## First contract
 
-`PAN.V8.Coordinates` defines the canonical coordinate order `(h, R, u, d, tau, chi, s, f)`. The serializer emits exactly that order. `tau` remains persistence; it is not silently renamed to `T`.
+`PAN.V8.Coordinates` defines the canonical coordinate order `(h, R, u, d, tau, chi, s, f)`. The serializer emits exactly that order. `tau` is the temporal (temporal-offset) coordinate; persistence is not that coordinate. The older provisional alias `T` is retained for input compatibility only and is not a schema change.
 
 ## Evidence discipline
 

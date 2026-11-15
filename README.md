@@ -28,6 +28,10 @@ ladder = gosset_seeded_ladder()          # 8D -> 4D -> 3D -> 2D views of the 240
 validate_schema(ladder.to_schema())
 ```
 
+V8 coordinates: `h` coherence, `R` recursion, `u` construction, `d` decoherence,
+`tau` temporal offset, `chi` chirality, `s` information density, `f` forcing. The
+provisional input alias `T` maps to `tau`; persistence is not the `tau` coordinate.
+
 Modules live at the repository root and import each other by name, so run scripts and
 tests from the root. Longer suites are run directly: `python lattice_gauge/tests/test_lattice_gauge.py`
 (about 2.5 min). Each experiment has a `run_*.py` entry point and a matching CI workflow in

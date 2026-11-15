@@ -91,8 +91,9 @@ def _entropy01(values: np.ndarray, bins: int = 32) -> float:
 def v8_projection(frame: ObservableFrame, previous: ObservableFrame | None = None) -> dict:
     """Explicit, dimensionless feature map; neutral placeholders are masked.
 
-    h/R/u/d/s are measured or computed diagnostics. tau is update persistence
-    only when a previous frame is supplied. chi (topological density) and f
+    h/R/u/d/s are measured or computed diagnostics. tau (the temporal coordinate)
+    is proxied by frame-to-frame plaquette stability, only when a previous
+    frame is supplied; this is a placeholder proxy, not a temporal offset. chi (topological density) and f
     (external forcing) are not measured by this minimal Wilson adapter and
     remain neutral placeholders with measured=False.
     """

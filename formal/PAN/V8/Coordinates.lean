@@ -20,6 +20,7 @@ theorem v8_coordinate_count (x : V8State) :
     x.coordinates.length = 8 := by
   rfl
 
-/-- Persistence remains tau; historical aliases are not schema changes. -/
-def V8State.persistence (x : V8State) : Float := x.tau
+/-- tau is the temporal-offset coordinate. The provisional alias T (formerly
+    glossed as persistence) is not a schema change. -/
+def V8State.temporal (x : V8State) : Float := x.tau
 end PAN
