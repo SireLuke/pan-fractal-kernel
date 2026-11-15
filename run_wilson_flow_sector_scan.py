@@ -5,8 +5,6 @@ clover Q(t), Wilson action, and a predeclared late-flow plateau diagnostic.
 It does not round Q or claim continuum topological quantization.
 
 Defaults: 8^4 lattice, third-order Runge-Kutta flow to t = 2.0 (smoothing radius
-sqrt(8t) = 4 lattice spacings, half the extent). Starts are hot (random) links,
-not thermalized configurations, so the scan probes the flow, not an ensemble.
 sqrt(8t) = 4 lattice spacings, half the extent), starting from Metropolis-thermalized
 configurations (SU(2) beta=2.4, SU(3) beta=6.0). `--start hot` flows random links
 instead, which probes the flow rather than an ensemble.
@@ -22,11 +20,6 @@ from lattice_gauge.gradient_flow import wilson_flow
 from lattice_gauge.lattice_gauge import Gauge
 
 
-def scan_one(n: int, beta: float, seed: int, extent: int = 8,
-             steps: int = 100, step_size: float = 0.02,
-             integrator: str = "rk3") -> dict:
-    g = Gauge(n, (extent,) * 4, beta=beta, seed=seed, hot=True)
-    history = wilson_flow(g, steps=steps, step_size=step_size, integrator=integrator)
 def thermalized_links(n: int, beta: float, seed: int, extent: int, therm: int,
                       n_configs: int, sep: int):
     """Metropolis-thermalize from a cold start, then yield n_configs link sets.
@@ -108,13 +101,6 @@ def scan_one(n: int, beta: float, seed: int, extent: int = 8,
     }
 
 
-def run_campaign(extent: int = 8, steps: int = 100, step_size: float = 0.02,
-                 seeds: tuple[int, ...] = (101, 202, 303),
-                 integrator: str = "rk3") -> dict:
-    runs = []
-    for n, beta in ((2, 2.0), (3, 5.5)):
-        for seed in seeds:
-            runs.append(scan_one(n, beta, seed, extent, steps, step_size, integrator))
 HOT_BETAS = ((2, 2.0), (3, 5.5))
 THERMALIZED_BETAS = ((2, 2.4), (3, 6.0))
 
@@ -204,10 +190,6 @@ def main() -> None:
     parser.add_argument("--steps", type=int, default=100)
     parser.add_argument("--step-size", type=float, default=0.02)
     parser.add_argument("--integrator", choices=("euler", "rk3"), default="rk3")
-    parser.add_argument("--seeds", type=int, nargs="+", default=[101, 202, 303])
-    parser.add_argument("--output", type=Path, default=Path("wilson_flow_sector_scan.json"))
-    args = parser.parse_args()
-    report = run_campaign(args.extent, args.steps, args.step_size, tuple(args.seeds), args.integrator)
     parser.add_argument("--start", choices=("thermalized", "hot"), default="thermalized")
     parser.add_argument("--therm", type=int, default=200, help="thermalization sweeps")
     parser.add_argument("--sep", type=int, default=40, help="sweeps between configurations")
