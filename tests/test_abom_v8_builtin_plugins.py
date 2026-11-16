@@ -3,7 +3,7 @@ import pytest
 
 from abom_v8.adapters.builtins import (
     BernoulliCurvePlugin, CartesianFieldDiagnosticsPlugin, FermiOccupancyPlugin,
-    GeronoCurvePlugin, GoldenAngleShellVisualizationPlugin, GoldenHarmonicScalePlugin, LemniscateComparisonPlugin, MengerGraphPlugin, StrataEvidencePlugin,
+    GeronoCurvePlugin, GoldenAngleShellVisualizationPlugin, GoldenHarmonicScalePlugin, LemniscateComparisonPlugin, MengerGraphPlugin, MengerWaveCouplingPlugin, StrataEvidencePlugin,
     MuCubeStatePlugin, V8TrajectoryPlugin, MengerMuCubePlugin, MicrotubuleLatticePlugin,
     register_builtin_plugins,
 )
@@ -14,7 +14,8 @@ from abom_v8.state import V8State
 def test_builtin_plugins_register_as_optional_capabilities():
     registry = PluginRegistry()
     plugins = register_builtin_plugins(registry)
-    assert len(plugins) == 13
+    assert len(plugins) == 14
+    assert "kernel.wave.menger-coupling" in plugins
     assert "abom.validation.strata-evidence" in plugins
     assert "abom.experiment.lemniscate-comparison" in plugins
     assert "abom.visualization.golden-angle-shells" in plugins
@@ -95,3 +96,14 @@ def test_menger_mu_cube_and_microtubule_adapters():
     lattice = MicrotubuleLatticePlugin().create()
     assert lattice.seam_vector == (13, -3)
     assert lattice.families_are_fibonacci_closed() is True
+
+
+def test_menger_wave_coupling_adapter_uses_kernel_operator():
+    mask = np.zeros((3, 3, 3), dtype=bool)
+    mask[1, 1, 1] = True
+    wave = np.ones((3, 3, 3), dtype=np.complex128)
+    result = MengerWaveCouplingPlugin.couple(
+        wave, level=1, opacity=0.25, phase_shift=0.0
+    )
+    assert result.metrics["occupied_cells"] == 20
+    assert result.metrics["power_transmission_ratio"] <= 1.0
