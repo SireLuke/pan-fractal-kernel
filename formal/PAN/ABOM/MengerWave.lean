@@ -1,3 +1,4 @@
+-- Project attribution: @SireLuke.
 namespace PAN.ABOM
 
 /-!
