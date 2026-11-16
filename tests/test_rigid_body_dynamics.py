@@ -26,10 +26,14 @@ def test_intermediate_axis_perturbation_grows(body):
     transverse = [math.hypot(s.omega_body[0],s.omega_body[2]) for s in states]
     assert max(transverse) > 20*transverse[0]
 
-def test_stable_axis_perturbations_remain_bounded(body):
-    for w in ((1e-3,0.,1.),(0.,1e-3,1.)):
-        states = body.simulate(w, duration=4., dt=.001)
-        assert max(math.hypot(s.omega_body[0],s.omega_body[1]) for s in states) < .01
+def test_smallest_and_largest_axis_perturbations_remain_bounded(body):
+    controls = (
+        ((1., 1e-3, 0.), lambda w: math.hypot(w[1], w[2])),
+        ((0., 1e-3, 1.), lambda w: math.hypot(w[0], w[1])),
+    )
+    for omega0, transverse in controls:
+        states = body.simulate(omega0, duration=4., dt=.001)
+        assert max(transverse(s.omega_body) for s in states) < .01
 
 def test_quaternion_normalization(body):
     states = body.simulate((.02,1.,.01), duration=2., dt=.002)
