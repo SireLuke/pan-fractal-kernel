@@ -21,7 +21,10 @@ from ..mu_cube import MuCube, MuCubeRegistry
 from ..state import V8State
 from ..trajectory import V8Trajectory
 from ..visualization.radial_shells import golden_angle_shells
-from ..strata import lemniscate_strata_record
+from ..strata import (
+    abom_strata_records, lemniscate_strata_record, menger_flux_strata_record,
+    microtubule_interpretation_strata_record, microtubule_lattice_strata_record,
+)
 
 
 class StrataEvidencePlugin:
@@ -31,6 +34,10 @@ class StrataEvidencePlugin:
     )
 
     create_lemniscate_record = staticmethod(lemniscate_strata_record)
+    create_menger_flux_record = staticmethod(menger_flux_strata_record)
+    create_microtubule_lattice_record = staticmethod(microtubule_lattice_strata_record)
+    create_microtubule_interpretation_record = staticmethod(microtubule_interpretation_strata_record)
+    all_records = staticmethod(abom_strata_records)
 
 
 class LemniscateComparisonPlugin:
