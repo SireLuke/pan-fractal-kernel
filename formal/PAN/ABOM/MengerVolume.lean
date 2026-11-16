@@ -33,11 +33,11 @@ def volDen (n : Nat) : Nat := 27 ^ n
 
 theorem volNum_succ (n : Nat) : volNum (n + 1) = volNum n * 20 := by
   unfold volNum
-  exact Nat.pow_succ
+  exact Nat.pow_succ 20 n
 
 theorem volDen_succ (n : Nat) : volDen (n + 1) = volDen n * 27 := by
   unfold volDen
-  exact Nat.pow_succ
+  exact Nat.pow_succ 27 n
 
 /-- The volume fraction never exceeds one. -/
 theorem vol_le_one (n : Nat) : volNum n ≤ volDen n := by
