@@ -5,7 +5,7 @@ import pytest
 
 from abom_v8.adapters.builtins import StrataEvidencePlugin
 from abom_v8.strata import (
-    abom_strata_records, menger_flux_strata_record,
+    abom_strata_records, menger_flux_strata_record, menger_surface_strata_record,
     microtubule_interpretation_strata_record, microtubule_lattice_strata_record,
 )
 
@@ -21,6 +21,11 @@ EXPECTED_THEOREMS = {
         "cellsPerLevel_three", "menger_three_removed",
         "menger_dimension_between_two_and_three", "volNum_succ", "volDen_succ",
         "vol_le_one", "vol_level_two",
+    ],
+    "PAN/ABOM/MengerSurface.lean": [
+        "surf_level_zero", "surf_level_one", "surf_level_two", "surf_level_three",
+        "surfDen_succ", "surfNum_succ", "surf_strictly_increasing",
+        "surf_exceeds_level", "volume_bounded_surface_unbounded",
     ],
     "PAN/ABOM/MicrotubuleLattice.lean": [
         "helixIndex_seam", "helixIndex_seam_invariant", "helixIndex_add",
@@ -42,14 +47,14 @@ def test_no_record_is_promotion_eligible():
 
 def test_record_ids_are_unique_and_ordered():
     ids = [r.claim_id for r in abom_strata_records()]
-    assert len(ids) == len(set(ids)) == 4
+    assert len(ids) == len(set(ids)) == 5
     assert ids[1:] == [
-        "ABOM-V8-MENGER-FLUX-001", "ABOM-V8-MT13-3-LATTICE-001",
+        "ABOM-V8-MENGER-FLUX-001", "ABOM-V8-MENGER-SURFACE-001", "ABOM-V8-MT13-3-LATTICE-001",
         "ABOM-V8-MT-COLLECTIVE-COUPLING-001",
     ]
 
 
-@pytest.mark.parametrize("factory", [menger_flux_strata_record, microtubule_lattice_strata_record])
+@pytest.mark.parametrize("factory", [menger_flux_strata_record, menger_surface_strata_record, microtubule_lattice_strata_record])
 def test_arithmetic_records_pass_formal_and_leave_science_untested(factory):
     statuses = _statuses(factory())
     assert statuses["formal_verification"] == "pass"
@@ -70,7 +75,7 @@ def test_physical_interpretation_is_separate_and_fully_untested():
 
 def test_plugin_exposes_the_new_records():
     assert StrataEvidencePlugin.create_menger_flux_record().claim_id == "ABOM-V8-MENGER-FLUX-001"
-    assert len(StrataEvidencePlugin.all_records()) == 4
+    assert len(StrataEvidencePlugin.all_records()) == 5
 
 
 @pytest.mark.parametrize("relpath", sorted(EXPECTED_THEOREMS))
