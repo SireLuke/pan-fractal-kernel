@@ -21,6 +21,7 @@ from ..mu_cube import MuCube, MuCubeRegistry
 from ..state import V8State
 from ..trajectory import V8Trajectory
 from ..visualization.radial_shells import golden_angle_shells
+from menger_wave_coupling import menger_wave_coupling
 from ..strata import (
     abom_strata_records, lemniscate_strata_record, menger_flux_strata_record,
     microtubule_interpretation_strata_record, microtubule_lattice_strata_record,
@@ -176,6 +177,17 @@ class MengerMuCubePlugin:
     flux_from_asymmetry = staticmethod(flux_from_asymmetry)
 
 
+class MengerWaveCouplingPlugin:
+    """Semi-transparent finite Menger mask applied to a complex scalar field."""
+
+    descriptor = PluginDescriptor(
+        "kernel.wave.menger-coupling", "0.1.0", ("0.1",),
+        ("wavefield.complex-scalar", "geometry.menger-mask", "coupling.attenuation-phase"),
+    )
+
+    couple = staticmethod(menger_wave_coupling)
+
+
 class MicrotubuleLatticePlugin:
     """Combinatorial 13_3 microtubule lattice geometry (nominal parameters)."""
 
@@ -204,6 +216,7 @@ def register_builtin_plugins(registry: PluginRegistry) -> dict[str, object]:
         GoldenHarmonicScalePlugin(),
         GoldenAngleShellVisualizationPlugin(),
         MengerMuCubePlugin(),
+        MengerWaveCouplingPlugin(),
         MicrotubuleLatticePlugin(),
     )
     registered: dict[str, object] = {}
