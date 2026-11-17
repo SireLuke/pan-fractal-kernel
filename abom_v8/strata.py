@@ -155,6 +155,31 @@ def menger_flux_strata_record(seed: int = 20261115) -> StrataEvidenceRecord:
     )
 
 
+def menger_surface_strata_record(seed: int = 20261115) -> StrataEvidenceRecord:
+    """Exact Menger surface-area counts (arithmetic, not physics)."""
+    return StrataEvidenceRecord(
+        protocol="STRATA-0.1",
+        claim_id="ABOM-V8-MENGER-SURFACE-001",
+        hypothesis=(
+            "The level-n Menger sponge has 2*20^n + 4*8^n exposed cell faces, so its "
+            "surface area is 2*(20/9)^n + 4*(8/9)^n: it increases with n and exceeds n, "
+            "while the volume fraction (20/27)^n stays at most 1."
+        ),
+        evidence_level="software-smoke-test",
+        seed=seed,
+        dimensions=_arithmetic_dimensions(
+            "Menger levels are combinatorial counts, not physical scales.",
+            "Closed form and an independent face count from the cell coordinates (levels 0-3), plus exact Lean statements over Nat.",
+            "formal/PAN/ABOM/MengerSurface.lean.",
+        ),
+        limitations=(
+            "Exact counting identities only; no physical surface, material or transport is claimed.",
+            "Lean proves arithmetic on the closed-form integers; the match to the geometric face count is checked by the Python recount for levels 0 to 3, not proved.",
+            "The unbounded-area statement is about the sequence of finite levels.",
+        ),
+    )
+
+
 def microtubule_lattice_strata_record(seed: int = 20261115) -> StrataEvidenceRecord:
     """Internal consistency of the 13_3 lattice arithmetic (not a structural claim)."""
     return StrataEvidenceRecord(
@@ -219,6 +244,7 @@ def abom_strata_records(seed: int = 20261115) -> tuple[StrataEvidenceRecord, ...
     return (
         lemniscate_strata_record(seed),
         menger_flux_strata_record(seed),
+        menger_surface_strata_record(seed),
         microtubule_lattice_strata_record(seed),
         microtubule_interpretation_strata_record(seed),
     )
