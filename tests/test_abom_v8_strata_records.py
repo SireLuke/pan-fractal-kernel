@@ -5,7 +5,6 @@ import pytest
 
 from abom_v8.adapters.builtins import StrataEvidencePlugin
 from abom_v8.strata import (
-    abom_strata_records, menger_flux_strata_record,
     abom_strata_records, menger_flux_strata_record, menger_surface_strata_record,
     microtubule_interpretation_strata_record, microtubule_lattice_strata_record,
 )
@@ -48,9 +47,6 @@ def test_no_record_is_promotion_eligible():
 
 def test_record_ids_are_unique_and_ordered():
     ids = [r.claim_id for r in abom_strata_records()]
-    assert len(ids) == len(set(ids)) == 4
-    assert ids[1:] == [
-        "ABOM-V8-MENGER-FLUX-001", "ABOM-V8-MT13-3-LATTICE-001",
     assert len(ids) == len(set(ids)) == 5
     assert ids[1:] == [
         "ABOM-V8-MENGER-FLUX-001", "ABOM-V8-MENGER-SURFACE-001", "ABOM-V8-MT13-3-LATTICE-001",
@@ -58,7 +54,6 @@ def test_record_ids_are_unique_and_ordered():
     ]
 
 
-@pytest.mark.parametrize("factory", [menger_flux_strata_record, microtubule_lattice_strata_record])
 @pytest.mark.parametrize("factory", [menger_flux_strata_record, menger_surface_strata_record, microtubule_lattice_strata_record])
 def test_arithmetic_records_pass_formal_and_leave_science_untested(factory):
     statuses = _statuses(factory())
@@ -80,7 +75,6 @@ def test_physical_interpretation_is_separate_and_fully_untested():
 
 def test_plugin_exposes_the_new_records():
     assert StrataEvidencePlugin.create_menger_flux_record().claim_id == "ABOM-V8-MENGER-FLUX-001"
-    assert len(StrataEvidencePlugin.all_records()) == 4
     assert len(StrataEvidencePlugin.all_records()) == 5
 
 
