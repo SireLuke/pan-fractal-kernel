@@ -13,8 +13,10 @@ from dataclasses import dataclass, field
 from .capability import (
     CapabilityVector, l1_distance, validate_minimums, validate_weights,
 )
+from .ledger import PlacementLedger
 from .params import NahtChannelParameters
 from .placement import DEFAULT_CALIBRATION
+from .provenance import EvidenceLevel, Provenance
 
 
 @dataclass(frozen=True, slots=True)
@@ -23,15 +25,26 @@ class Niche:
     anchor: CapabilityVector
     weights: tuple[float, ...] = (1.0,) * 8
     minimums: Mapping[str, float] = field(default_factory=dict)
+    min_evidence: EvidenceLevel | None = None
 
     def __post_init__(self) -> None:
         if not self.niche_id.strip():
             raise ValueError("niche_id must be non-empty")
         object.__setattr__(self, "weights", validate_weights(self.weights))
         object.__setattr__(self, "minimums", validate_minimums(self.minimums))
+        if self.min_evidence is not None:
+            object.__setattr__(self, "min_evidence", EvidenceLevel(self.min_evidence))
 
     def accepts(self, vector: CapabilityVector) -> bool:
         return all(vector[axis] >= floor for axis, floor in self.minimums.items())
+
+    def admits(self, occupant: "Occupant") -> bool:
+        """Capability floors plus, when required, verified provenance of enough rank."""
+        if not self.accepts(occupant.vector):
+            return False
+        if self.min_evidence is None:
+            return True
+        return occupant.provenance_ok and occupant.provenance.level >= self.min_evidence
 
     def cost(self, vector: CapabilityVector) -> float:
         return l1_distance(vector, self.anchor, self.weights)
@@ -46,6 +59,7 @@ class Occupant:
     evidence: tuple[str, ...] = ()
     context_tokens: int | None = None
     naht: NahtChannelParameters = NahtChannelParameters()
+    provenance: Provenance | None = None
 
     def __post_init__(self) -> None:
         if not self.model_id.strip() or not self.transport_id.strip():
@@ -53,6 +67,12 @@ class Occupant:
         if self.context_tokens is not None and (
                 isinstance(self.context_tokens, bool) or self.context_tokens <= 0):
             raise ValueError("context_tokens must be a positive integer")
+
+    @property
+    def provenance_ok(self) -> bool:
+        """True when provenance is present and still matches this id and vector."""
+        return (self.provenance is not None
+                and self.provenance.verify(self.model_id, self.vector))
 
 
 @dataclass(frozen=True, slots=True)
@@ -65,7 +85,8 @@ class PlacementDecision:
 
 
 class NicheMap:
-    def __init__(self, niches: Iterable[Niche]) -> None:
+    def __init__(self, niches: Iterable[Niche], ledger: PlacementLedger | None = None) -> None:
+        self.ledger = ledger
         self._niches = tuple(niches)
         if not self._niches:
             raise ValueError("a niche map needs at least one niche")
@@ -105,18 +126,27 @@ class NicheMap:
     def seat(self, niche_id: str, occupant: Occupant) -> Occupant | None:
         """Put `occupant` in `niche_id`; return whoever it displaced."""
         niche = self.niche(niche_id)
-        if not niche.accepts(occupant.vector):
-            raise ValueError(f"{occupant.model_id!r} does not meet the minimums of {niche_id!r}")
+        if not niche.admits(occupant):
+            raise ValueError(
+                f"{occupant.model_id!r} does not meet the minimums or evidence level of {niche_id!r}"
+            )
         elsewhere = self.niche_of(occupant.model_id)
         if elsewhere is not None and elsewhere != niche_id:
             raise ValueError(f"{occupant.model_id!r} already occupies {elsewhere!r}")
         displaced = self._occupants.get(niche_id)
         self._occupants[niche_id] = occupant
+        if self.ledger is not None:
+            digest = occupant.provenance.digest if occupant.provenance else None
+            self.ledger.append("seat", niche_id, occupant.model_id, digest)
         return displaced
 
     def vacate(self, niche_id: str) -> Occupant | None:
         self.niche(niche_id)
-        return self._occupants.pop(niche_id, None)
+        removed = self._occupants.pop(niche_id, None)
+        if removed is not None and self.ledger is not None:
+            digest = removed.provenance.digest if removed.provenance else None
+            self.ledger.append("vacate", niche_id, removed.model_id, digest)
+        return removed
 
     def place(self, occupant: Occupant) -> PlacementDecision:
         """Seat `occupant` in its nearest accepting niche.
@@ -125,7 +155,7 @@ class NicheMap:
         the incumbent), and re-placing the same model id refreshes it in place.
         """
         candidates = [(n.cost(occupant.vector), n.niche_id)
-                      for n in self._niches if n.accepts(occupant.vector)]
+                      for n in self._niches if n.admits(occupant)]
         if not candidates:
             return PlacementDecision(None, False, None, None, "no niche accepts this occupant")
         cost, niche_id = min(candidates)

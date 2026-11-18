@@ -7,8 +7,10 @@ software only: see README.md for the evidence boundary.
 from .capability import (
     AXES, PROFILE_SCHEMA, CapabilityVector, fit_cost, l1_distance,
 )
+from .ledger import GENESIS_HASH, LedgerEntry, LedgerError, PlacementLedger
 from .params import NahtChannelParameters
 from .placement import BenchmarkMap, Placement, PlacementError, place
+from .provenance import EvidenceLevel, Provenance
 from .registry import Niche, NicheMap, Occupant, PlacementDecision
 from .router import (
     DispatchResult, NoEligibleOccupant, RouteDecision, TaskProfile, dispatch, route,
@@ -21,4 +23,6 @@ __all__ = [
     "Niche", "NicheMap", "Occupant", "PlacementDecision", "DispatchResult",
     "NoEligibleOccupant", "RouteDecision", "TaskProfile", "dispatch", "route",
     "OllamaTransport", "Transport", "TransportError",
+    "EvidenceLevel", "Provenance", "GENESIS_HASH", "LedgerEntry", "LedgerError",
+    "PlacementLedger",
 ]

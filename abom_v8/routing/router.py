@@ -11,6 +11,7 @@ from dataclasses import dataclass, field
 from .capability import (
     CapabilityVector, fit_cost, validate_minimums, validate_weights,
 )
+from .provenance import EvidenceLevel
 from .registry import NicheMap, Occupant
 from .transport import Transport
 
@@ -26,16 +27,22 @@ class TaskProfile:
     minimums: Mapping[str, float] = field(default_factory=dict)
     min_context_tokens: int | None = None
     excess_penalty: float = 0.25
+    min_evidence: EvidenceLevel | None = None
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "weights", validate_weights(self.weights))
         object.__setattr__(self, "minimums", validate_minimums(self.minimums))
+        if self.min_evidence is not None:
+            object.__setattr__(self, "min_evidence", EvidenceLevel(self.min_evidence))
         if self.min_context_tokens is not None and (
                 isinstance(self.min_context_tokens, bool) or self.min_context_tokens <= 0):
             raise ValueError("min_context_tokens must be a positive integer")
 
     def eligible(self, occupant: Occupant) -> bool:
         if any(occupant.vector[axis] < floor for axis, floor in self.minimums.items()):
+            return False
+        if self.min_evidence is not None and not (
+                occupant.provenance_ok and occupant.provenance.level >= self.min_evidence):
             return False
         if self.min_context_tokens is not None:
             return (occupant.context_tokens is not None
