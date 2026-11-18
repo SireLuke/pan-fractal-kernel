@@ -48,6 +48,35 @@ is wanted it must be explicit, versioned and validated.
 The per-axis distance metric properties and seating-preserves-occupancy are
 stated in `formal/PAN/ABOM/Routing.lean` (integer model, not the float router).
 
+## Provenance and the placement ledger
+
+`Provenance.create(model_id, vector, level, calibration_version, sources, attested_by)`
+records how a placement was obtained and a SHA-256 digest over the model id,
+coordinates and every recorded field. Levels are an ordered ladder of auditable
+categories, not a trust score, and are separate from STRATA claim levels:
+
+| Level | Requires |
+|---|---|
+| `DECLARED` | nothing recorded |
+| `BENCHMARKED` | at least one named source |
+| `REPRODUCED` | sources and one attester |
+| `INDEPENDENTLY_REPRODUCED` | sources and two distinct attesters |
+
+- `Occupant.provenance_ok` is true only while the digest still matches that model
+  id and vector, so provenance cannot be moved to a different model or survive an
+  edit to the coordinates.
+- `Niche(min_evidence=...)` and `TaskProfile(min_evidence=...)` gate on verified
+  provenance of at least that level. Raising evidence never loses eligibility.
+- `NicheMap(niches, ledger=PlacementLedger())` appends every seat and vacate to an
+  append-only hash chain, in the same entry shape for every model. Export with
+  `to_jsonl()`; `from_jsonl()` refuses a ledger whose chain does not verify.
+
+A valid digest shows a record is unaltered, not that the benchmarks were honest;
+attester names are caller-asserted. The chain detects edits to a copied ledger,
+but whoever holds the whole ledger can recompute it, so anchor `ledger.head`
+somewhere you trust (a signed commit or release). See
+`../../MODEL_PROVENANCE_STRATA_PROTOCOL.md`.
+
 ## NAHT parameters
 
 Each occupant carries a `NahtChannelParameters` block for the Non-Abelian History

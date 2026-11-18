@@ -267,6 +267,34 @@ def model_routing_strata_record(seed: int = 20261115) -> StrataEvidenceRecord:
     )
 
 
+def provenance_strata_record(seed: int = 20261115) -> StrataEvidenceRecord:
+    """Evidence gating and ledger integrity for model placements (software only)."""
+    return StrataEvidenceRecord(
+        protocol="STRATA-0.1",
+        claim_id="ABOM-V8-PROVENANCE-001",
+        hypothesis=(
+            "Placement provenance is a tamper-evident, ordered evidence ladder: altering a "
+            "model id, coordinates or recorded evidence invalidates its digest, evidence gates "
+            "are monotone in level, and every seat or vacate is appended to a hash-chained "
+            "ledger in the same shape for every model."
+        ),
+        evidence_level="software-smoke-test",
+        seed=seed,
+        dimensions=_arithmetic_dimensions(
+            "Evidence levels are ordered categories, not measured quantities or a trust score.",
+            "SHA-256 digest and hash chain in Python and exact Lean statements over Nat orders and lists.",
+            "formal/PAN/ABOM/Provenance.lean.",
+        ),
+        limitations=(
+            "Software only; a valid digest shows the record is unaltered, not that the benchmarks were run honestly.",
+            "Attester names are caller-asserted strings; there are no signatures or identity checks.",
+            "The hash chain detects edits to a copied ledger but a holder of the whole ledger can recompute it; the head hash must be anchored externally.",
+            "Lean covers evidence-gate monotonicity and ledger-append length only, not SHA-256 or chain integrity.",
+            "Placement evidence levels are separate from STRATA claim evidence levels.",
+        ),
+    )
+
+
 def abom_strata_records(seed: int = 20261115) -> tuple[StrataEvidenceRecord, ...]:
     """All ABOM-V8 STRATA records in a fixed order."""
     return (
@@ -276,4 +304,5 @@ def abom_strata_records(seed: int = 20261115) -> tuple[StrataEvidenceRecord, ...
         microtubule_lattice_strata_record(seed),
         microtubule_interpretation_strata_record(seed),
         model_routing_strata_record(seed),
+        provenance_strata_record(seed),
     )
