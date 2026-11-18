@@ -239,6 +239,34 @@ def microtubule_interpretation_strata_record(seed: int = 20261115) -> StrataEvid
     )
 
 
+def model_routing_strata_record(seed: int = 20261115) -> StrataEvidenceRecord:
+    """Determinism and metric properties of capability placement/routing (software only)."""
+    return StrataEvidenceRecord(
+        protocol="STRATA-0.1",
+        claim_id="ABOM-V8-MODEL-ROUTING-001",
+        hypothesis=(
+            "Capability placement and routing are deterministic and model-agnostic: the "
+            "per-axis capability distance is a metric, seating a model in an occupied niche "
+            "leaves the set of occupied niches unchanged, and the routing choice depends "
+            "only on capability vectors, never on model or vendor names."
+        ),
+        evidence_level="software-smoke-test",
+        seed=seed,
+        dimensions=_arithmetic_dimensions(
+            "Capability axes are normalised engineering descriptors, not physical or measured scales.",
+            "Floating-point Python router and exact Lean statements over Nat (per-axis distance, seating).",
+            "formal/PAN/ABOM/Routing.lean.",
+        ),
+        limitations=(
+            "Software and arithmetic only; no claim that a capability coordinate describes a model's cognition.",
+            "No benchmark-to-axis calibration is shipped or validated; callers declare one and its version.",
+            "Lean covers the per-axis integer distance and seating, not the float router or benchmark placement.",
+            "The capability profile is separate from the canonical V8 vector; no V8 mapping is claimed.",
+            "NAHT channels (r, e, p) are carried as an unassigned parameter block; no routing-to-NAHT mapping is claimed.",
+        ),
+    )
+
+
 def abom_strata_records(seed: int = 20261115) -> tuple[StrataEvidenceRecord, ...]:
     """All ABOM-V8 STRATA records in a fixed order."""
     return (
@@ -247,4 +275,5 @@ def abom_strata_records(seed: int = 20261115) -> tuple[StrataEvidenceRecord, ...
         menger_surface_strata_record(seed),
         microtubule_lattice_strata_record(seed),
         microtubule_interpretation_strata_record(seed),
+        model_routing_strata_record(seed),
     )
