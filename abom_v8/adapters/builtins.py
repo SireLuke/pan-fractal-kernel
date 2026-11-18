@@ -25,6 +25,7 @@ from menger_wave_coupling import menger_wave_coupling
 from ..strata import (
     abom_strata_records, lemniscate_strata_record, menger_flux_strata_record,
     microtubule_interpretation_strata_record, microtubule_lattice_strata_record,
+    model_routing_strata_record,
 )
 
 
@@ -38,6 +39,7 @@ class StrataEvidencePlugin:
     create_menger_flux_record = staticmethod(menger_flux_strata_record)
     create_microtubule_lattice_record = staticmethod(microtubule_lattice_strata_record)
     create_microtubule_interpretation_record = staticmethod(microtubule_interpretation_strata_record)
+    create_model_routing_record = staticmethod(model_routing_strata_record)
     all_records = staticmethod(abom_strata_records)
 
 

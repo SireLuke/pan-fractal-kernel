@@ -7,6 +7,7 @@ from abom_v8.adapters.builtins import StrataEvidencePlugin
 from abom_v8.strata import (
     abom_strata_records, menger_flux_strata_record, menger_surface_strata_record,
     microtubule_interpretation_strata_record, microtubule_lattice_strata_record,
+    model_routing_strata_record,
 )
 
 FORMAL = Path(__file__).resolve().parents[1] / "formal"
@@ -26,6 +27,10 @@ EXPECTED_THEOREMS = {
         "surf_level_zero", "surf_level_one", "surf_level_two", "surf_level_three",
         "surfDen_succ", "surfNum_succ", "surf_strictly_increasing",
         "surf_exceeds_level", "volume_bounded_surface_unbounded",
+    ],
+    "PAN/ABOM/Routing.lean": [
+        "adist_self", "adist_comm", "adist_eq_zero_iff", "adist_triangle",
+        "wdist_triangle", "seatAt_same", "seatAt_other", "seatAt_preserves_occupied",
     ],
     "PAN/ABOM/MicrotubuleLattice.lean": [
         "helixIndex_seam", "helixIndex_seam_invariant", "helixIndex_add",
@@ -47,14 +52,17 @@ def test_no_record_is_promotion_eligible():
 
 def test_record_ids_are_unique_and_ordered():
     ids = [r.claim_id for r in abom_strata_records()]
-    assert len(ids) == len(set(ids)) == 5
+    assert len(ids) == len(set(ids)) == 6
     assert ids[1:] == [
         "ABOM-V8-MENGER-FLUX-001", "ABOM-V8-MENGER-SURFACE-001", "ABOM-V8-MT13-3-LATTICE-001",
-        "ABOM-V8-MT-COLLECTIVE-COUPLING-001",
+        "ABOM-V8-MT-COLLECTIVE-COUPLING-001", "ABOM-V8-MODEL-ROUTING-001",
     ]
 
 
-@pytest.mark.parametrize("factory", [menger_flux_strata_record, menger_surface_strata_record, microtubule_lattice_strata_record])
+@pytest.mark.parametrize("factory", [
+    menger_flux_strata_record, menger_surface_strata_record,
+    microtubule_lattice_strata_record, model_routing_strata_record,
+])
 def test_arithmetic_records_pass_formal_and_leave_science_untested(factory):
     statuses = _statuses(factory())
     assert statuses["formal_verification"] == "pass"
@@ -75,7 +83,8 @@ def test_physical_interpretation_is_separate_and_fully_untested():
 
 def test_plugin_exposes_the_new_records():
     assert StrataEvidencePlugin.create_menger_flux_record().claim_id == "ABOM-V8-MENGER-FLUX-001"
-    assert len(StrataEvidencePlugin.all_records()) == 5
+    assert StrataEvidencePlugin.create_model_routing_record().claim_id == "ABOM-V8-MODEL-ROUTING-001"
+    assert len(StrataEvidencePlugin.all_records()) == 6
 
 
 @pytest.mark.parametrize("relpath", sorted(EXPECTED_THEOREMS))
