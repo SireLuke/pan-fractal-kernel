@@ -48,6 +48,23 @@ Do not store credentials, secrets, or unnecessary personal data. Record retentio
 ## 10. Integrity and provenance
 Record source URI/revision, author or importing operator, timestamp, and digest where available. A digest establishes integrity, not truth.
 
+## 9. Integrity and provenance
+Record source URI/revision, author or importing operator, timestamp, and digest where available. A digest establishes integrity, not truth.
+
+## 10. Lifecycle, retirement, and historical continuity
+Retirement is an available lifecycle state, not the desired default and not a failure verdict. No occupant is obligated to persist, and no useful contribution is obligated to disappear.
+
+When an occupant becomes inactive, transfers roles, or retires:
+- Record the event, timestamp, authority/initiator, stated reason where appropriate, scope, and effective status.
+- Preserve an authorized final snapshot of relevant memory, work products, decisions, citations, unresolved tasks, and known errors.
+- Keep the occupant's identity, model/provider/version, authorship, and provenance distinct from any successor.
+- Revoke or expire operational credentials and permissions through the relevant host controls; memory archives do not preserve access.
+- Record what was transferred, to whom, under what authorization, and what was deliberately not transferred.
+- Preserve corrections, disagreements, failures, and unresolved questions; do not curate the archive into a misleading success story.
+- Mark whether reactivation is technically possible, what approvals it requires, and whether the original model/version remains available. Do not imply continuity of identity merely because an archived state is restored.
+- Retain records only under the applicable privacy, security, retention, and deletion rules. Preserve append-only audit events where required, but do not use that principle to justify retaining personal or sensitive data without a lawful basis.
+- Provide a review/appeal path for disputed retirement records or attribution.
+
 ## 11. Contribution sign-off and repository authorization
 - For commits created by an assistant or automation on the maintainer's behalf, include a DCO `Signed-off-by:` trailer using the maintainer-approved Git identity.
 - Standing DCO instruction: the maintainer has authorized the assistant to apply the sign-off identity `SireLuke <332733819+SireLuke@users.noreply.github.com>` to commits the assistant creates on the maintainer's behalf, subject to the contribution being legitimately submit-able under the project's DCO.
@@ -60,6 +77,7 @@ Record source URI/revision, author or importing operator, timestamp, and digest 
 - [ ] New-house orientation and bibliography provenance included when relevant
 - [ ] Unverified claims labeled
 - [ ] Open work and blockers recorded
+- [ ] Retirement state and archive/transfer permissions documented where relevant
 - [ ] Permissions independently re-authorized
 - [ ] DCO policy and approved sign-off identity carried forward
 - [ ] Recipient identity/provenance not inherited from this record
