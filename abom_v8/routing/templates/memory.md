@@ -42,6 +42,12 @@ Preserve material history. Mark superseded claims and link to the correction; do
 ## 8. Dependencies and permissions
 List authorized tools, data scopes, external dependencies, and expiry/review dates. Memory does not grant permissions.
 
+## 9. Privacy and retention
+Do not store credentials, secrets, or unnecessary personal data. Record retention and deletion requirements.
+
+## 10. Integrity and provenance
+Record source URI/revision, author or importing operator, timestamp, and digest where available. A digest establishes integrity, not truth.
+
 ## 9. Integrity and provenance
 Record source URI/revision, author or importing operator, timestamp, and digest where available. A digest establishes integrity, not truth.
 
