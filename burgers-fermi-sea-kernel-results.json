@@ -1,0 +1,125 @@
+{
+  "checks": {
+    "inviscid_steepening": true,
+    "inviscid_t_star_est": true,
+    "colehopf_nu0.1": true,
+    "colehopf_nu0.01": true,
+    "viscous_bounded": true,
+    "backward_recovery": true,
+    "randomised_shock_time": true,
+    "ceiling_climbed_inviscid": true,
+    "ceiling_arrested_viscous": true
+  },
+  "inviscid_max_grad": {
+    "0.0": 1.0000000000000204,
+    "0.5": 2.000000000000008,
+    "0.9": 9.986813035243264
+  },
+  "inviscid_t_star_est": 1.0001320437732257,
+  "viscous_nu_0.1_colehopf_err": 4.3298697960381105e-15,
+  "viscous_nu_0.1_max_grad_t1.5": 3.695685687993927,
+  "viscous_nu_0.01_colehopf_err": 1.176836406102666e-14,
+  "viscous_nu_0.01_max_grad_t1.5": 46.87193901258873,
+  "backward_err": 5.551115123125783e-16,
+  "randomised": [
+    {
+      "seed": 0,
+      "a2": 0.24,
+      "t_star_exact": 0.726,
+      "t_star_est": 0.74,
+      "rel_err": 0.0205
+    },
+    {
+      "seed": 1,
+      "a2": 0.058,
+      "t_star_exact": 0.942,
+      "t_star_est": 0.957,
+      "rel_err": 0.0163
+    },
+    {
+      "seed": 2,
+      "a2": 0.216,
+      "t_star_exact": 0.742,
+      "t_star_est": 0.759,
+      "rel_err": 0.0224
+    },
+    {
+      "seed": 3,
+      "a2": 0.081,
+      "t_star_exact": 1.171,
+      "t_star_est": 1.182,
+      "rel_err": 0.0088
+    },
+    {
+      "seed": 4,
+      "a2": 0.159,
+      "t_star_exact": 0.963,
+      "t_star_est": 0.978,
+      "rel_err": 0.0157
+    },
+    {
+      "seed": 5,
+      "a2": 0.199,
+      "t_star_exact": 1.286,
+      "t_star_est": 1.306,
+      "rel_err": 0.0154
+    },
+    {
+      "seed": 6,
+      "a2": 0.108,
+      "t_star_exact": 1.117,
+      "t_star_est": 1.131,
+      "rel_err": 0.0125
+    },
+    {
+      "seed": 7,
+      "a2": 0.156,
+      "t_star_exact": 0.99,
+      "t_star_est": 1.006,
+      "rel_err": 0.0161
+    }
+  ],
+  "sea_reference_initial": {
+    "n_shells": 12,
+    "sea_occupations": [
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "measured_occupations": [
+      1.0,
+      2.860341836692283e-33,
+      1.7542853946759116e-33,
+      6.078448485376216e-34,
+      3.5907852896601374e-34,
+      5.1597182889208905e-34,
+      7.686604699659793e-34,
+      3.2781296590180264e-33,
+      7.249781065246481e-33,
+      4.465861402835309e-33,
+      8.617868311308477e-33,
+      1.6338464022150918e-32
+    ],
+    "sea_agrees_with_measured": true
+  },
+  "ceiling_k_front": {
+    "inviscid t=0": 1,
+    "inviscid t=0.9": 9,
+    "viscous nu=0.1 t=1.5": 7
+  },
+  "ceiling_x_front": {
+    "inviscid t=0": 0.0,
+    "inviscid t=0.9": 4.566023657178559,
+    "viscous nu=0.1 t=1.5": 4.0437704306503495
+  },
+  "all_passed": true
+}
